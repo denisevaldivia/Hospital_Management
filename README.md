@@ -17,6 +17,7 @@ El objetivo final es proporcionar a los administradores y personal de operacione
 
 ## ** Instalación de virtual env (Window) **
 python -m venv ./venv
+
 .\venv\Scripts\Activate.ps1
 
 ## ** Instalación requirements **
