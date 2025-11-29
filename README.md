@@ -20,8 +20,10 @@ python -m venv ./venv
 
 .\venv\Scripts\Activate.ps1
 
+
 ## ** Instalación requirements **
 pip install -r requirements.txt
+
 
 ## ** Run conteiners **
 
@@ -30,7 +32,9 @@ docker run --name cassandra-conteiner -p 9042:9042 -d cassandra
 docker run --name dbmongo -d -p 27017:27017 mongo
 
 docker run --name dgraph-conteiner -d -p 8080:8080 -p 9080:9080 dgraph/standalone:latest
+
 docker run --name ratel-conteiner -d -p 8000:8000 dgraph/ratel:latest
+
 
 ## ** Correr el codigo main **
 python main.py
