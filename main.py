@@ -179,7 +179,7 @@ def main():
             
             dgraph_menu()
         elif choice == "4":
-            print("Exiting application...")
+            print("Exiting application of Ganó el Amor...")
             sys.exit(0)
         else:
             print("Invalid option.")
