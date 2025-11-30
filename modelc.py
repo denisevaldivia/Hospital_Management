@@ -20,16 +20,16 @@ def create_schema(session): pass
 #   QUERIES VACÍAS
 # ------------------------------------
 
-def query_1(session, user_input): pass
-def query_2(session, user_input): pass
-def query_3(session, user_input): pass
-def query_4(session, user_input): pass
-def query_5(session, user_input): pass
-def query_7(session, user_input): pass
-def query_8(session, user_input): pass
-def query_9(session, user_input): pass
-def query_10(session, user_input): pass
-def query_11(session, user_input): pass
-def query_12(session, user_input): pass
-def query_13(session, user_input): pass
-def query_14(session, user_input): pass
+def query_1(session): pass
+def query_2(session): pass
+def query_3(session): pass
+def query_4(session): pass
+def query_5(session): pass
+def query_7(session): pass
+def query_8(session): pass
+def query_9(session): pass
+def query_10(session): pass
+def query_11(session): pass
+def query_12(session): pass
+def query_13(session): pass
+def query_14(session): pass
