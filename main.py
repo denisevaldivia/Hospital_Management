@@ -25,11 +25,11 @@ def cassandra_menu():
         5: modelc.query_4,
         6: modelc.query_5,
         7: modelc.query_7,
-        9: modelc.query_8, #esta
+        9: modelc.query_8, 
         10: modelc.query_9,
         11: modelc.query_10,
-        12: modelc.query_11, #esta
-        13: modelc.query_12, #esta
+        12: modelc.query_11, 
+        13: modelc.query_12,
         14: modelc.query_13,
         15: modelc.query_14,
     }
@@ -37,19 +37,18 @@ def cassandra_menu():
     while True:
         print("\n--- CASSANDRA MENU ---")
         print("1. Populate data")
-        for i in range(2, 17):
+        for i in range(2, 16):
             print(f"{i}. Query {i-1}")
-        print("17. Back to main menu")
+        print("16. Back to main menu")
 
         choice = int(input("Select an option: "))
         if choice == 1:
             populatec.bulk_insert(session)
-        elif 2 <= choice <= 16:
-            user_input = input("Enter input for query: ")
+        elif 2 <= choice <= 15:
             func = cassandra_queries.get(choice)
             if func:
-                func(session, user_input)
-        elif choice == 17:
+                func(session)
+        elif choice == 16:
             cluster.shutdown()
             break
         else:
@@ -79,29 +78,25 @@ def mongo_menu():
         11: modelm.query_10,
         12: modelm.query_11,
         13: modelm.query_12,
-        14: modelm.query_13,
-        15: modelm.query_14,
-        16: modelm.query_15,
     }
 
     while True:
         print("\n--- MONGODB MENU ---")
         print("1. Populate data")
-        for i in range(2, 17):
+        for i in range(2, 14):
             print(f"{i}. Query {i-1}")
-        print("17. Back to main menu")
+        print("14. Back to main menu")
 
         choice = int(input("Select an option: "))
         if choice == 1:
             populatem.populate_data(db)
-        elif 2 <= choice <= 16:
-            user_input = input("Enter input for query: ")
+        elif 2 <= choice <= 13:
             func = mongo_queries.get(choice)
             if func:
-                func(db, user_input)
+                func(db)
             else:
                 print("Query not implemented yet")
-        elif choice == 17:
+        elif choice == 14:
             client.close()
             break
         else:
@@ -122,9 +117,6 @@ def dgraph_create_client_stub():
 def dgraph_create_client(client_stub):
     return pydgraph.DgraphClient(client_stub)
 
-def dgraph_close_client_stub(client_stub):
-    client_stub.close()
-
 def dgraph_menu():
     client_stub = dgraph_create_client_stub()
     client = dgraph_create_client(client_stub)
@@ -134,12 +126,12 @@ def dgraph_menu():
         2: modeld.query_1,
         3: modeld.query_2,
         4: modeld.query_3,
-        5: modeld.query_4, #esta
-        6: modeld.query_5, #esta
+        5: modeld.query_4,
+        6: modeld.query_5, 
         7: modeld.query_6,
         8: modeld.query_7,
         9: modeld.query_8,
-        10: modeld.query_9, #esta
+        10: modeld.query_9,
         11: modeld.query_10,
         12: modeld.query_11,
         13: modeld.query_12,
@@ -150,20 +142,19 @@ def dgraph_menu():
     while True:
         print("\n--- DGRAPH MENU ---")
         print("1. Populate data")
-        for i in range(2, 17):
+        for i in range(2, 16):
             print(f"{i}. Query {i-1}")
-        print("17. Back to main menu")
+        print("16. Back to main menu")
 
         choice = int(input("Select an option: "))
         if choice == 1:
             populated.populate_data(client)
-        elif 2 <= choice <= 16:
-            user_input = input("Enter input for query: ")
+        elif 2 <= choice <= 15:
             func = dgraph_queries.get(choice)
             if func:
-                func(client, user_input)
-        elif choice == 17:
-            dgraph_close_client_stub(client_stub)
+                func(client)
+        elif choice == 16:
+            client_stub.close()
             break
         else:
             print("Invalid option.")
@@ -195,4 +186,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
