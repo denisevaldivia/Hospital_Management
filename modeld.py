@@ -5,7 +5,7 @@ import pydgraph
 
 def set_schema(client):
     schema = """
-        # Primero declaramos los predicados
+        
         id_transaccion: int @index(int) .
         id_paciente: int @index(int) .
         id_sala: int @index(int) .
@@ -47,7 +47,7 @@ def set_schema(client):
         TIENEN: [uid] @reverse .
         OTORGAN: [uid] @reverse .
 
-        # Ahora definimos los tipos
+        
         type Transaccion {
             id_transaccion
             nombre_servicio
@@ -123,17 +123,18 @@ def set_schema(client):
 # ------------------------------------
 #   QUERIES VACÍAS
 # ------------------------------------
-def query_1(client, user_input): pass
-def query_2(client, user_input): pass
-def query_3(client, user_input): pass
-def query_4(client, user_input): pass
-def query_5(client, user_input): pass
-def query_6(client, user_input): pass
-def query_7(client, user_input): pass
-def query_8(client, user_input): pass
-def query_9(client, user_input): pass
-def query_10(client, user_input): pass
-def query_11(client, user_input): pass
-def query_12(client, user_input): pass
-def query_13(client, user_input): pass
-def query_14(client, user_input): pass
+def query_1(client): pass
+def query_2(client): pass
+def query_3(client): pass
+def query_4(client): pass
+def query_5(client): pass
+def query_6(client): pass
+def query_7(client): pass
+def query_8(client): pass
+def query_9(client): pass
+def query_10(client): pass
+def query_11(client): pass
+def query_12(client): pass
+def query_13(client): pass
+def query_14(client): pass
+
