@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import datetime
 
 
 # CASSANDRA ----------------
@@ -15,46 +16,66 @@ def cassandra_menu():
     cluster = Cluster(CLUSTER_IPS.split(','))
     session = cluster.connect()
     modelc.create_keyspace(session, KEYSPACE, REPLICATION_FACTOR)
-    session.set_keyspace(KEYSPACE)
+    session.set_keyspace(KEYSPACE) 
     modelc.create_schema(session)
 
     cassandra_queries = {
-        2: modelc.query_1,
-        3: modelc.query_2,
-        4: modelc.query_3,
-        5: modelc.query_4,
-        6: modelc.query_5,
+        1: modelc.query_1,
+        2: modelc.query_2,
+        3: modelc.query_3,
+        4: modelc.query_4,
+        5: modelc.query_5,
         7: modelc.query_7,
-        9: modelc.query_8, 
-        10: modelc.query_9,
-        11: modelc.query_10,
-        12: modelc.query_11, 
-        13: modelc.query_12,
-        14: modelc.query_13,
-        15: modelc.query_14,
+        8: modelc.query_8, 
+        9: modelc.query_9,
+        10: modelc.query_10,
+        11: modelc.query_11, 
+        12: modelc.query_12,
+        13: modelc.query_13,
+        14: modelc.query_14,
     }
 
     while True:
         print("\n--- CASSANDRA MENU ---")
-        print("1. Populate data")
-        for i in range(2, 16):
-            print(f"{i}. Query {i-1}")
-        print("16. Back to main menu")
+        print("0. Populate data")
+        for i in range(1, 15):
+            print(f"{i}. Query {i}")
+        print("15. Back to main menu")
+        print("404. Drop all tables")
 
         choice = int(input("Select an option: "))
-        if choice == 1:
+        if choice == 0:
             populatec.bulk_insert(session)
-        elif 2 <= choice <= 15:
+        elif 1 <= choice <= 14:
             func = cassandra_queries.get(choice)
             if func:
-                func(session)
-        elif choice == 16:
+                if choice == 8:  # Query 8
+                    exp = input("Expediente del paciente: ")
+                    inicio = datetime.fromisoformat(i) if (i := input("Fecha inicio (YYYY-MM-DD) o vacío: ")) else None
+                    fin = datetime.fromisoformat(i) if (i := input("Fecha fin (YYYY-MM-DD) o vacío: ")) else None
+                    func(session, exp, inicio, fin)
+
+                elif choice == 11:  # Query 11
+                    exp = input("Expediente del paciente: ")
+                    inicio = datetime.fromisoformat(i) if (i := input("Fecha inicio (YYYY-MM-DD) o vacío: ")) else None
+                    fin = datetime.fromisoformat(i) if (i := input("Fecha fin (YYYY-MM-DD) o vacío: ")) else None
+                    tipo = input("Tipo de vacuna o vacío: ") or None
+                    func(session, exp, inicio, fin, tipo)
+
+                elif choice == 12:  # Query 12
+                    exp = input("Expediente del paciente: ")
+                    inicio = datetime.fromisoformat(i) if (i := input("Fecha inicio (YYYY-MM-DD) o vacío: ")) else None
+                    fin = datetime.fromisoformat(i) if (i := input("Fecha fin (YYYY-MM-DD) o vacío: ")) else None
+                    func(session, exp, inicio, fin)
+                    # func(session)
+        elif choice == 15:
             cluster.shutdown()
+            break
+        elif choice == 404:
+            modelc.drop_schema(session)
             break
         else:
             print("Invalid option.")
-
-
 
 # MONGODB ----------------
 from pymongo import MongoClient

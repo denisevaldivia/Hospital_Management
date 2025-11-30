@@ -7,18 +7,34 @@ from cassandra.query import SimpleStatement
 import uuid
 import random
 from datetime import datetime
+from cassandra.util import uuid_from_time
+
+FECHAS = [
+    datetime(2024, 7, 20),
+    datetime(2024, 10, 5),
+    datetime(2025, 1, 18),
+    datetime(2025, 5, 9),
+    datetime(2025, 9, 25),
+]
+
+
+def pick_timeuuids(n):
+    fechas = random.sample(FECHAS, n)
+    return [uuid_from_time(f) for f in fechas]
 
 
 def bulk_insert(session):
 
     print("\n--- POPULATING DATABASE CASSANDRA ---\n")
 
-    # --- Datos de ejemplo ---
-    pacientes = [f"PACIENTE_{i}" for i in range(1, 6)]
-    donadores = [f"DONADOR_{i}" for i in range(1, 6)]
-    visitantes = [f"VISITANTE_{i}" for i in range(1, 6)]
-    cuentas = [f"CUENTA_{i}" for i in range(1, 6)]
-    salas = [f"SALA_{i}" for i in range(1, 6)]
+    # Datos de los IDs
+    pacientes = [f"PA-{i:02d}" for i in range(1, 4)]
+    donadores = [f"DO-{i:02d}" for i in range(1, 4)]
+    visitantes = [f"VI-{i:02d}" for i in range(1, 4)]
+    cuentas = [f"CT-{i:02d}" for i in range(1, 4)]
+    salas = [f"SA-{i:02d}" for i in range(1, 4)]
+
+    # Resto
     doctores = ["Dra. Gómez", "Dr. López", "Dr. Ramírez", "Dr. Pérez", "Dra. Fernández"]
     estados_sala = ["Libre", "Ocupada", "En limpieza", "Reservada"]
     medicamentos = ["Metformina", "Amoxicilina", "Omeprazol", "Ibuprofeno", "Paracetamol"]
@@ -27,7 +43,7 @@ def bulk_insert(session):
     tipo_vacuna = ["Dosis única", "Series múltiples dosis", "Dosis de refuerzo periódicas"]
     tipos_sangre = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
     tipos_pago = ["Efectivo", "Tarjeta", "Transferencia"]
-    tipos_transaccion = [1,2,3,4,5]
+    tipos_transaccion = ["Pago", "Reembolso", "Contracargo", "Cancelación"]
     motivo = ["Familiar", "Emergencia", "Acompañante", "Platicar"]
     tipo_sala = ["Consulta", "Laboratorio", "Terapia"]
     relacion_paciente = ["Padre","Madre","Hijo","Amig@", "Pareja"]
@@ -37,71 +53,116 @@ def bulk_insert(session):
 
     # --- Prescriptions ---
     for paciente in pacientes:
-        session.execute("""
-            INSERT INTO prescriptions_by_patient
-            (exp_paciente, fecha_creacion, doctor_responsable, medicamentos, observaciones)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (paciente, uuid.uuid1(), random.choice(doctores), random.choice(medicamentos), random.choice(observaciones)))
+        for fecha in pick_timeuuids(2):
+            session.execute("""
+                INSERT INTO prescriptions_by_patient
+                (exp_paciente, fecha_creacion, doctor_responsable, medicamentos, observaciones)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (
+                paciente,
+                fecha,
+                random.choice(doctores),
+                random.choice(medicamentos),
+                random.choice(observaciones)
+            ))
 
     # --- Historial médico ---
     for paciente in pacientes:
-        session.execute("""
-            INSERT INTO historial_by_patient
-            (exp_paciente, fecha_diagnostico, descripcion, observaciones, doctor_responsable)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (paciente,
-                uuid.uuid1(), 
-                random.choice(["Paciente consciente y orientado", "Signos vitales dentro de parámetros normales", "El paciente refiere malestar leve, sin dificultad respiratoria evidente"]),
-                random.choice(["Se identifica una molestia leve en el ojo izquierdo fuera del diagnostico inicial", "Se identifica un proceso sin mayor complicación", "Se requiere una cita de seguimiento"]), 
-                random.choice(doctores)))
+        for fecha in pick_timeuuids(2):
+            session.execute("""
+                INSERT INTO historial_by_patient
+                (exp_paciente, fecha_diagnostico, descripcion, observaciones, doctor_responsable)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (
+                paciente,
+                fecha,
+                random.choice([
+                    "Paciente consciente y orientado",
+                    "Signos vitales dentro de parámetros normales",
+                    "El paciente refiere malestar leve"
+                ]),
+                random.choice([
+                    "Revisión sin complicaciones",
+                    "Se requiere cita de seguimiento",
+                    "Evolución favorable"
+                ]),
+                random.choice(doctores)
+            ))
 
     # --- Blood donation ---
     for donador in donadores:
-        session.execute("""
-            INSERT INTO blood_donation_by_patient
-            (exp_donador, fecha_donacion, tipo_sangre, nombre, cantidad)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (donador, uuid.uuid1(), random.choice(tipos_sangre), random.choice(nombre), random.uniform(1, 2)))
+        for fecha in pick_timeuuids(2):
+            session.execute("""
+                INSERT INTO blood_donation_by_patient
+                (exp_donador, fecha_donacion, tipo_sangre, nombre, cantidad)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (
+                donador,
+                fecha,
+                random.choice(tipos_sangre),
+                random.choice(nombre),
+                random.uniform(1, 2)
+            ))
 
     # --- Vaccines ---
     for paciente in pacientes:
-        session.execute("""
-            INSERT INTO vaccines_by_patient
-            (exp_paciente, fecha_vacuna, tipo_vacuna, dosis, lote)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (paciente, uuid.uuid1(), random.choice(vacunas), random.choice(tipo_vacuna), str(uuid.uuid4())))
+        for fecha in pick_timeuuids(2):
+            session.execute("""
+                INSERT INTO vaccines_by_patient
+                (exp_paciente, fecha_vacuna, tipo_vacuna, dosis, lote)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (
+                paciente,
+                fecha,
+                random.choice(vacunas),
+                random.choice(tipo_vacuna),
+                "".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", k=5))
+            ))
 
     # --- Visits ---
-    for visitante in visitantes:
-        session.execute("""
-            INSERT INTO logs_by_visit
-            (expediente, fecha_visita, nombre_visitante, motivo, duracion, relacion_paciente)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (visitante, uuid.uuid1(), random.choice(nombre_visitante), random.choice(motivo), random.randint(10,120), random.choice(relacion_paciente)))
+    for paciente in pacientes:
+        for fecha in pick_timeuuids(2):
+           session.execute("""
+                INSERT INTO logs_by_visit
+                (exp_paciente, fecha_visita, nombre_visitante, motivo, duracion, relacion_paciente)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (paciente, fecha, random.choice(nombre_visitante), random.choice(motivo), random.randint(10, 120), random.choice(relacion_paciente)))
+
 
     # --- Transactions ---
     for cuenta in cuentas:
-        session.execute("""
-            INSERT INTO logs_by_transactions
-            (cuenta, fecha_pago, tipo_transaccion, monto, metodo_pago, folio)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (cuenta, uuid.uuid1(), random.choice(tipos_transaccion), round(random.uniform(100,5000),2), random.choice(tipos_pago), uuid.uuid4()))
+        for fecha in pick_timeuuids(2):
+            session.execute("""
+                INSERT INTO logs_by_transactions
+                (cuenta, fecha_pago, tipo_transaccion, monto, metodo_pago, folio)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (
+                cuenta,
+                fecha,
+                random.choice(tipos_transaccion),
+                round(random.uniform(100, 5000), 2),
+                random.choice(tipos_pago),
+                uuid.uuid4()
+            ))
 
     # --- Room logs ---
     for sala in salas:
-        session.execute("""
-            INSERT INTO logs_by_room
-            (id_sala, fecha_evento, tipo_sala, estado, responsable, descripcion)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (
-            sala, 
-            uuid.uuid1(), 
-            random.choice(tipo_sala), 
-            random.choice(estados_sala), 
-            random.choice(doctores), 
-            random.choice(["Sala privada y tranquila, diseñada para ofrecer comodidad al paciente.", "Los colores de la sala son claros para mantener la sensación de limpieza.", "Sala bien equipada para toda clase de procedimientos"])
-        ))
+        for fecha in pick_timeuuids(2):
+            session.execute("""
+                INSERT INTO logs_by_room
+                (id_sala, fecha_evento, tipo_sala, estado, responsable, descripcion)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (
+                sala,
+                fecha,
+                random.choice(tipo_sala),
+                random.choice(estados_sala),
+                random.choice(doctores),
+                random.choice([
+                    "Sala equipada para procedimientos",
+                    "Revisión de limpieza completada",
+                    "Equipamiento verificado"
+                ])
+            ))
 
-
-
-    print("Datos insertados a cada table exitosamente en Cassandra.")
+    print("Datos insertados exitosamente en Cassandra.")
