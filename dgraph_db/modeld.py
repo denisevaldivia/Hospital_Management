@@ -135,7 +135,8 @@ def query_4(client, id_paciente):
             fecha_nacimiento
             edad
             doctores: ~ATIENDE {
-                doctor_id
+                uid
+                id_doctor
                 nombre
                 especialidad
                 licencia
@@ -156,98 +157,134 @@ def query_4(client, id_paciente):
         # Store the response
         res = txn.query(query, variables=variables)
         data = json.loads(res.json)
-        patient_list = data.get('patient', [])
 
-        # Visualize if data exists
-        if patient_list:
-            patient = patient_list[0]
-            doctores = patient.get('doctores', [])
-            
-            print(f"Patient found: {patient.get('nombre')}")
-            print(f"Number of doctors: {len(doctores)}")
-            
-            # Visualize the relationship
-            visualize_dgraph_response(res, f"patient_{id_paciente}_doctors")
-            
-            return {"patient": patient, "doctores": doctores}
+        # Return Data
+        print(f"\nQuery 4 Results:")
+        pretty_print_recursive(data)
+        
+    finally:
+        txn.discard()
+
+import json
+
+# Query 5: Show all rooms a doctor has booked
+def query_5(client, id_doctor):
+    query = """
+    query getRooms($id_doctor: int) {
+        doctor(func: eq(id_doctor, $id_doctor)) {
+            id_doctor
+            nombre
+            especialidad
+            licencia
+            anios_experiencia
+            correo
+            telefono
+            salas: AGENDA {
+                id_sala
+                tipo
+            }
+        }
+    }
+    """
+
+    # Define variables for query substitution
+    variables = {"$id_doctor": id_doctor}
+
+    # Execute the query
+    txn = client.txn(read_only=True)
+    try:
+        # Query the database
+        res = txn.query(query, variables=variables)
+        
+        # Decode and load the JSON response
+        data = json.loads(res.json.decode('utf-8'))
+        doctor_data = data.get('doctor', [])
+
+        # Grab the second entry, which contains the full doctor data
+        doctor = doctor_data[1] if len(doctor_data) > 1 else None
+
+        if doctor:
+            print(f"Doctor: {doctor['nombre']} ({doctor['especialidad']})")
+            print(f"Licencia: {doctor['licencia']}")
+            print(f"Años de Experiencia: {doctor['anios_experiencia']}")
+            print(f"Correo: {doctor['correo']}")
+            print(f"Teléfono: {doctor['telefono']}")
+            print("Salas agendadas:")
+
+            # Check if the doctor has booked any rooms
+            if 'salas' in doctor:
+                for sala in doctor['salas']:
+                    print(f"  ID Sala: {sala['id_sala']} \n  Tipo: {sala['tipo']}")
+            else:
+                print("  Ninguna sala ha sido agendada.")
         else:
-            print(f"No patient found with ID: {id_paciente}")
-            return None
+            print(f"No se encontró información válida para id_doctor {id_doctor}.")
+    
+    finally:
+        txn.discard()
 
+# Query 9: Show number of patients a doctor has
+def query_9(client, id_doctor):
+    query = """
+    query countPatients($id_doctor: string) {
+        patient_count(func: type(Paciente)) @filter(has(ATIENDE)) {
+            uid
+            ATIENDE @filter(eq(id_doctor, $id_doctor)) {
+                uid
+            }
+        }
+    }
+    """
+
+    # Define variables for query substitution
+    variables = {"$id_doctor": id_doctor}
+
+    # Execute the query
+    txn = client.txn(read_only=True)
+    try:
+        # Query the database
+        res = txn.query(query, variables=variables)
+        
+        # Decode and load the JSON response
+        data = json.loads(res.json.decode('utf-8'))
+
+        # Extract the list of patient nodes with the specific doctor relationship
+        pacientes = data.get('patient_count', [])
+
+        # Print the number of patients related to the doctor
+        print(f"Número de Pacientes que atiende el Doctor con ID {id_doctor}: {len(pacientes)}")
+    
     finally:
         txn.discard()
 
 # ------------------------------------
-#   VISUALIZADOR
+#   PRINT RECURSIVE
 # ------------------------------------
 
-# Visualize any query response in PyVis
-def visualize_dgraph_response(query_response, output_name):    
-    # Create folder to store visualizations
-    ACTIVE_DIR = os.path.dirname(os.path.abspath(__file__))     #dgraph_db
-    reports_dir = os.path.join(ACTIVE_DIR, 'reports')
-    os.makedirs(reports_dir, exist_ok = True)
-    
-    # Output graph name
-    output_file = f"{reports_dir}/{output_name}.html"
+def pretty_print_recursive(data, indent=0, seen_uids=None):
+    if seen_uids is None:
+        seen_uids = set()  # Initialize the set to track printed entities by UID
 
-    # Parse the JSON response
-    data = json.loads(query_response.json)
-    
-    # Create network
-    net = Network(height="750px", width="100%", directed=True)
-    
-    # Simple colors for different node types
-    colors = {
-        "patient": "#8ec7ff",
-        "doctor": "#ffd08e", 
-        "default": "#e0e0e0",
-    }
-    
-    # Recursive function to add nodes and edges
-    def add_nodes_edges(data_dict, parent_uid=None, parent_type=None):
-        if not isinstance(data_dict, dict):
-            return
-        
-        for node_type, nodes in data_dict.items():
-            if not isinstance(nodes, list):
-                nodes = [nodes]
-            
-            for node in nodes:
-                if isinstance(node, dict) and "uid" in node:
-                    uid = node["uid"]
-                    
-                    # Determine node type for coloring
-                    node_color = colors.get(node_type.lower(), colors["default"])
-                    
-                    # Create label from name or type
-                    label = node.get("nombre") or node.get("name") or node_type
-                    
-                    # Add node
-                    net.add_node(uid, label=label, color=node_color, 
-                                title=f"{node_type}: {str(node)[:100]}...")
-                    
-                    # Add edge from parent if exists
-                    if parent_uid:
-                        net.add_edge(parent_uid, uid, label=parent_type)
-                    
-                    # Process relationships (nested dicts except uid)
-                    for key, value in node.items():
-                        if key != "uid" and isinstance(value, (dict, list)):
-                            if isinstance(value, dict):
-                                value = [value]
-                            for item in value:
-                                if isinstance(item, dict):
-                                    add_nodes_edges({key: item}, uid, key)
-    
-    # Start processing
-    add_nodes_edges(data)
-    
-    # Save and open
-    net.save_graph(output_file)
-    print(f"Graph saved as: {output_file}")
-    
-    return net, output_file
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if isinstance(value, list):
+                # Handle list of entities (like doctors or rooms)
+                for item in value:
+                    # Check if this item has a UID and whether we've already printed it
+                    item_uid = item.get('uid')
+                    if item_uid and item_uid not in seen_uids:
+                        seen_uids.add(item_uid)  # Mark this item as seen
+                        print(f"{' ' * indent}{key.capitalize()}:")  # Print the relationship header (e.g., "Salas:")
+                        pretty_print_recursive(item, indent + 2, seen_uids)  # Recursively print the item
+            else:
+                # For key-value pairs, print normally (skip 'uid')
+                if key != 'uid':
+                    print(f"{' ' * indent}{key.capitalize()}: {value}")
+    elif isinstance(data, list):
+        # Process a list of items (e.g., doctors, rooms, etc.)
+        for item in data:
+            pretty_print_recursive(item, indent, seen_uids)  # No need to check for 'uid' here
+
 
 # ------------------------------------
 #   QUERIES VACÍAS
@@ -255,11 +292,9 @@ def visualize_dgraph_response(query_response, output_name):
 def query_1(client): pass
 def query_2(client): pass
 def query_3(client): pass
-def query_5(client): pass
 def query_6(client): pass
 def query_7(client): pass
 def query_8(client): pass
-def query_9(client): pass
 def query_10(client): pass
 def query_11(client): pass
 def query_12(client): pass
