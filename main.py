@@ -7,7 +7,7 @@ from datetime import datetime
 #   CASSANDRA 
 # ------------------------------------
 from cassandra.cluster import Cluster
-from cassandra import modelc, populatec                # This can be aliased --> as <name>
+from cassandra_db import modelc, populatec                # This can be aliased --> as <name>
 
 CLUSTER_IPS = os.getenv('CASSANDRA_CLUSTER_IPS', '127.0.0.1')
 KEYSPACE = os.getenv('CASSANDRA_KEYSPACE', 'logistics')
@@ -82,7 +82,7 @@ def cassandra_menu():
 #   MONGODB
 # ------------------------------------
 from pymongo import MongoClient
-from mongo import modelm, populatem
+from mongo_db import modelm, populatem
 
 def mongo_menu():
     client = MongoClient("mongodb://localhost:27017/")
@@ -131,7 +131,7 @@ def mongo_menu():
 #   DGRAPH
 # ------------------------------------
 import pydgraph
-from dgraph import modeld, populated
+from dgraph_db import modeld, populated
 
 DGRAPH_URI = os.getenv('DGRAPH_URI', 'localhost:9080')
 
