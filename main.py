@@ -3,10 +3,11 @@ import sys
 from datetime import datetime
 
 
-# CASSANDRA ----------------
+# ------------------------------------
+#   CASSANDRA 
+# ------------------------------------
 from cassandra.cluster import Cluster
-import modelc
-import populatec
+from cassandra import modelc, populatec                # This can be aliased --> as <name>
 
 CLUSTER_IPS = os.getenv('CASSANDRA_CLUSTER_IPS', '127.0.0.1')
 KEYSPACE = os.getenv('CASSANDRA_KEYSPACE', 'logistics')
@@ -77,10 +78,11 @@ def cassandra_menu():
         else:
             print("Invalid option.")
 
-# MONGODB ----------------
+# ------------------------------------
+#   MONGODB
+# ------------------------------------
 from pymongo import MongoClient
-import modelm
-import populatem
+from mongo import modelm, populatem
 
 def mongo_menu():
     client = MongoClient("mongodb://localhost:27017/")
@@ -125,10 +127,11 @@ def mongo_menu():
 
 
 
-# DGRAPH ----------------
+# ------------------------------------
+#   DGRAPH
+# ------------------------------------
 import pydgraph
-import modeld
-import populated
+from dgraph import modeld, populated
 
 DGRAPH_URI = os.getenv('DGRAPH_URI', 'localhost:9080')
 
@@ -181,8 +184,10 @@ def dgraph_menu():
             print("Invalid option.")
 
 
+# ------------------------------------
+#   MAIN
+# ------------------------------------
 
-# MAIN ----------------
 def main():
     while True:
         print("\n=== MAIN MENU ===")
