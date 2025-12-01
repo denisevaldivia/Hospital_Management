@@ -176,7 +176,9 @@ def dgraph_menu():
         elif 2 <= choice <= 15:
             func = dgraph_queries.get(choice)
             if func:
-                func(client)
+                if choice == 5:
+                    id_paciente = input('Ingrese el ID del paciente: ')
+                    func(client, id_paciente)
         elif choice == 16:
             client_stub.close()
             break

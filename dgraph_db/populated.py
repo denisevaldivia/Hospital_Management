@@ -27,8 +27,8 @@ def populate_data(client):
             "correo": fake.email(),
             "telefono": fake.random_number(digits=10),
             "AGENDA": [],
-            "ATIENDEN": [],
-            "OTORGAN": []
+            "ATIENDE": [],
+            "OTORGA": []
         }
         doctors.append(doc)
 
@@ -57,14 +57,14 @@ def populate_data(client):
             "sexo": sexo,
             "fecha_nacimiento": birth_date.isoformat(),
             "edad": (datetime.now().date() - birth_date).days // 365,
-            "ATIENDEN": [{"uid": doctor["uid"]}]
+            "ATIENDE": [{"uid": doctor["uid"]}]
         }
 
         # Relación inversa en doctor
-        doc_uid = pat["ATIENDEN"][0]["uid"]
+        doc_uid = pat["ATIENDE"][0]["uid"]
         for doc in doctors:
             if doc["uid"] == doc_uid:
-                doc["ATIENDEN"].append({"uid": pat["uid"]})
+                doc["ATIENDE"].append({"uid": pat["uid"]})
                 break
 
         patients.append(pat)
@@ -92,7 +92,7 @@ def populate_data(client):
             "dgraph.type": "Servicio",
             "nombre_servicio": random.choice(["Ultrasonido", "RayosX", "Análisis clínicos", "Anatomía patológica", "Electrocardigrama", "Análisis de orina", "Toma de glucosa en sangre"]),
             "precio": round(random.uniform(50, 9900), 2),
-            "GENERAN": [{"uid": patient["uid"]}]
+            "GENERA": [{"uid": patient["uid"]}]
         }
         services.append(srv)
 
@@ -106,7 +106,7 @@ def populate_data(client):
             "id_transaccion": i,
             "nombre_servicio": random.choice(services)["nombre_servicio"],
             "precio": round(random.uniform(50, 9900), 2),
-            "GENERAN": [{"uid": patient["uid"]}]
+            "GENERA": [{"uid": patient["uid"]}]
         }
         transactions.append(tr)
 
@@ -142,8 +142,8 @@ def populate_data(client):
             "medicina": medicina,
             "cantidad": random.randint(1, 10),
             "frecuencia": random.randint(1, 3),
-            "TIENEN": [{"uid": patient["uid"]}],
-            "OTORGAN": [{"uid": doctor["uid"]}]
+            "TIENE": [{"uid": patient["uid"]}],
+            "OTORGA": [{"uid": doctor["uid"]}]
         }
         prescriptions.append(pres)
 
@@ -161,7 +161,7 @@ def populate_data(client):
             "motivo": random.choice(["Acompañamiento", "Revisión", "Emergencia", "Platicar"]),
             "hora_entrada": fake.date_time_this_month().isoformat(),
             "hora_salida": (datetime.now() + timedelta(hours=random.randint(1,3))).isoformat(),
-            "RECIBEN": [{"uid": patient["uid"]}]
+            "RECIBE": [{"uid": patient["uid"]}]
         }
         visits.append(visit)
 
