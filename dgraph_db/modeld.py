@@ -4,7 +4,6 @@
 import pydgraph
 import json
 import os
-from pyvis.network import Network
 
 def set_schema(client):
     schema = """

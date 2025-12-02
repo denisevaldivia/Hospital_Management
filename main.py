@@ -199,9 +199,9 @@ def dgraph_menu():
 def main():
     while True:
         print("\n=== MAIN MENU ===")
-        print("1. Cassandra")
-        print("2. MongoDB")
-        print("3. Dgraph")
+        print("1. Cassandra (Logs)")
+        print("2. MongoDB (Catálogos)")
+        print("3. Dgraph (Relaciones)")
         print("4. Exit")
 
         choice = input("Select a database: ")
