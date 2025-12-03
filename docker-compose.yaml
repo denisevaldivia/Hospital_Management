@@ -1,0 +1,25 @@
+# Application name
+name: hospital-management-app
+
+services:
+  # Cassandra DB
+  cassandra:
+    image: cassandra:latest
+    container_name: hospital-cassandra
+    ports: 
+      - "9042:9042"
+
+  # Mongo DB
+  mongo:
+    image: mongo:latest
+    container_name: hospital-mongo
+    ports: 
+      - "27017:27017"
+
+  # Dgraph
+  dgraph:
+    image: dgraph/standalone:latest
+    container_name: hospital-dgraph
+    ports: 
+      - "8080:8080"
+      - "9080:9080"
