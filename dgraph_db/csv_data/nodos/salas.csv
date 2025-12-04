@@ -1,0 +1,6 @@
+id_sala,id_doctor,tipo
+10,1,Consulta
+11,2,Emergencia
+12,3,Rayos X
+13,4,Vacunación
+14,5,Control

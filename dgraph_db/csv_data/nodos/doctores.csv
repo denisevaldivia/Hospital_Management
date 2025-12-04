@@ -1,0 +1,6 @@
+id_doctor,nombre,especialidad,licencia,anios_experiencia,correo,telefono
+1,Dr. Juan Torres,Cardiología,LIC1234,12,juan@hospital.com,5551234
+2,Dr. Sofía Méndez,Pediatría,LIC5678,7,sofia@hospital.com,5555678
+3,Dr. Carlos Vega,Radiología,LIC9012,10,carlos@hospital.com,5559012
+4,Dr. Elena Ponce,General,LIC3456,4,elena@hospital.com,5553456
+5,Dr. Alberto Ramos,Neurología,LIC7890,15,alberto@hospital.com,5557890

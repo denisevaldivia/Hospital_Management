@@ -1,0 +1,6 @@
+id_transaccion,nombre_servicio,precio
+1001,Consulta General,500
+1001,Rayos X,900
+1002,Vacunación,300
+1003,Análisis de Sangre,450
+1004,Ultrasonido,1200
