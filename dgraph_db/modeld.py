@@ -262,12 +262,10 @@ def query_5(client, id_doctor):
 # Query 9: Show number of patients a doctor has
 def query_9(client, id_doctor):
     query = """
-    query countPatients($id_doctor: string) {
-        patient_count(func: type(Paciente)) @filter(has(nombre)) {
-            uid
-            nombre
-            ~ATIENDE @filter(eq(id_doctor, $id_doctor)) {
-                uid
+    query countPatients($id_doctor: int) {
+        doctor(func: eq(id_doctor, $id_doctor)) {
+            pacientes_count: ATIENDE {
+                count(uid)
             }
         }
     }
@@ -285,16 +283,21 @@ def query_9(client, id_doctor):
         # Store the response
         data = json.loads(res.json)
 
-        # Extract the list of patient nodes with the specific doctor relationship
-        pacientes = data.get('patient_count', [])
-
-        # Filter valid patients
-        valid_patients = [p for p in pacientes if any(d['id_doctor'] == id_doctor for d in p.get('~ATIENDE', []))]
-
-        # Print the number of patients related to the doctor
-        print('=' * 40)
-        print(f"\nNúmero de Pacientes que atiende el Doctor con ID {id_doctor}: {len(valid_patients)}\n")
-        print('=' * 40)
+        # Check if there are doctors
+        if 'doctor' in data and len(data['doctor']) > 0:
+            # Search for patient count
+            pacientes_count = data['doctor'][0].get('pacientes_count', [])
+            if pacientes_count:
+                count = pacientes_count[0].get('count', 0)
+                
+                # Print results
+                print('=' * 40)
+                print(f"\nNúmero de Pacientes que atiende el Doctor con ID {id_doctor}: {count}\n")
+                print('=' * 40)
+            else:
+                print(f"No se encontró el número de pacientes para el Doctor con ID {id_doctor}.")
+        else:
+            print(f"No se encontró al Doctor con ID {id_doctor}.")
 
     finally:
         txn.discard()
@@ -315,13 +318,16 @@ def query_10(client):
 # Query 11: Transactions by service + total amount
 def query_11(client, id_servicio, name): 
     query = """
-    query getPrice($id_servicio: int) {
-        transactions(func: eq(id_servicio, $id_servicio)) @filter(has(precio)) {
-            uid
-            id_transaccion
+    {
+        servicio(func: eq(id_servicio, $id_servicio))
+            id_servicio
             nombre_servicio
-            precio
-        }
+            GENERA {
+                uid
+                id_transaccion
+                nombre_servicio
+                precio
+            }
     }
     """
 
@@ -335,27 +341,18 @@ def query_11(client, id_servicio, name):
         res = txn.query(query, variables=variables)
         data = json.loads(res.json)
 
+        # Get transactions
+        servicio = data.get('servicio', [])[0]  
+        transactions = servicio.get('GENERA', [])
+
+        # Calculate total earnings
+        total_precio = sum(transaction.get('precio', 0.0) for transaction in transactions)
+
         # Print the results
         print()
         print('=' * 40)
-        
-        if 'transactions' in data:
-            total_precio = 0.0
-            found_transaction = False                   # No transaction found
-
-            # Check if there are transactions
-            for transaction in data['transactions']:
-                found_transaction = True                # Flag Transaction found
-
-                # Sum the price of each transaction
-                total_precio += transaction.get('precio', 0.0)
-
-            if not found_transaction:
-                print(f'No se encontraron transacciones para el Servicio {name}.')
-            
-            # Total price of all transactions, filtered by service
-            print(f'Total de Transacciones para Servicio {name}:\n')
-            print(f'\nGanancia Total de las transacciones para el Servicio {name}: {total_precio}')
+        print(f'Total de Transacciones para Servicio {name}:\n')
+        print(f'\nGanancia Total de las transacciones para el Servicio {name}: {total_precio}')
         
         print('=' * 40)
 
