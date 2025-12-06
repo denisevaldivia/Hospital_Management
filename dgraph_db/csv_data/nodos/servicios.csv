@@ -4,3 +4,7 @@ id_paciente,nombre_servicio
 2,Análisis de Sangre
 3,Vacunación
 3,Ultrasonido
+4,Consulta General
+4,Terapia Física
+5,Tomografía
+5,Ultrasonido

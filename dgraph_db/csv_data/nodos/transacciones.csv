@@ -4,3 +4,7 @@ id_transaccion,nombre_servicio,precio
 1002,Vacunación,300
 1003,Análisis de Sangre,450
 1004,Ultrasonido,1200
+1005,Consulta General,500
+1006,Terapia Física,1500
+1007,Tomografía,2000
+1008,Ultrasonido,1200
