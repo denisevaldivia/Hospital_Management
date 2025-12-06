@@ -1,6 +1,10 @@
-id_paciente,id_paciente
+id_paciente,id_servicio
 1,1
-2,2
-3,3
-4,4
+1,2
+2,3
+3,4
+3,5
+4,1
+4,6
+5,7
 5,5

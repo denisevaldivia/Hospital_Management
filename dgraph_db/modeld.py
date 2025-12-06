@@ -13,6 +13,8 @@ def set_schema(client):
         id_sala: int @index(int) .
         id_doctor: int @index(int) .
         id_receta: int @index(int) .
+        id_visita: int @index(int) .
+        id_servicio: int @index(int) .
 
         nombre_servicio: string @index(term) .
         precio: float @index(float) .
@@ -59,6 +61,7 @@ def set_schema(client):
 
         type Servicio {
             id_paciente
+            id_servicio
             nombre_servicio
             GENERA
             SOLICITA
@@ -97,6 +100,7 @@ def set_schema(client):
 
         type Visita {
             id_paciente
+            id_visita
             nombre_visitante
             relacion_paciente
             motivo

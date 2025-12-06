@@ -1,9 +1,9 @@
-id_paciente,nombre_visitante,relacion_paciente,motivo,hora_entrada,hora_salida
-1,Roberto Pérez,Hermano,Visita familiar,2025-01-10 09:00,2025-01-10 09:45
-1,Lucía Pérez,Madre,Entrega documentos,2025-01-10 11:00,2025-01-10 11:20
-2,Marco Luna,Amigo,Saludo,2025-01-11 15:00,2025-01-11 15:10
-3,Sara Díaz,Hija,Visita médica,2025-01-12 10:30,2025-01-12 11:00
-3,Sara Díaz,Hija,Entrega comida,2025-01-13 09:00,2025-01-13 09:15
-4,Hornacis Ruiz,Padre,Visita médica,2025-06-09 12:00,2025-06-09 14:00
-5,Teresa Torres,Madre,Visita familiar,2025-02-12 13:00,2025-02-12 16:00
-5,Julia Romero,Madre,Entrega comida,2025-02-12 14:00,2025-02-12 16:00
+id_paciente,id_visita,nombre_visitante,relacion_paciente,motivo,hora_entrada,hora_salida
+1,1,Roberto Pérez,Hermano,Visita familiar,2025-01-10 09:00,2025-01-10 09:45
+1,2,Lucía Pérez,Madre,Entrega documentos,2025-01-10 11:00,2025-01-10 11:20
+2,3,Marco Luna,Amigo,Saludo,2025-01-11 15:00,2025-01-11 15:10
+3,4,Sara Díaz,Hija,Visita médica,2025-01-12 10:30,2025-01-12 11:00
+3,4,Sara Díaz,Hija,Entrega comida,2025-01-13 09:00,2025-01-13 09:15
+4,5,Hornacis Ruiz,Padre,Visita médica,2025-06-09 12:00,2025-06-09 14:00
+5,6,Teresa Torres,Madre,Visita familiar,2025-02-12 13:00,2025-02-12 16:00
+5,7,Julia Romero,Madre,Entrega comida,2025-02-12 14:00,2025-02-12 16:00

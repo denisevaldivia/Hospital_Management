@@ -1,10 +1,10 @@
-id_transaccion,nombre_servicio,precio
-1001,Consulta General,500
-1001,Rayos X,900
-1002,Vacunación,300
-1003,Análisis de Sangre,450
-1004,Ultrasonido,1200
-1005,Consulta General,500
-1006,Terapia Física,1500
-1007,Tomografía,2000
-1008,Ultrasonido,1200
+id_transaccion,id_servicio,nombre_servicio,precio
+1001,1,Consulta General,500
+1001,2,Rayos X,900
+1002,4,Vacunación,300
+1003,3,Análisis de Sangre,450
+1004,5,Ultrasonido,1200
+1005,1,Consulta General,500
+1006,6,Terapia Física,1500
+1007,7,Tomografía,2000
+1008,5,Ultrasonido,1200
