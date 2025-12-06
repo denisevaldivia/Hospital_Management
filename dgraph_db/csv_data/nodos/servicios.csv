@@ -1,10 +1,8 @@
-id_paciente,id_servicio,nombre_servicio
-1,1,Consulta General
-1,2,Rayos X
-2,3,Análisis de Sangre
-3,4,Vacunación
-3,5,Ultrasonido
-4,1,Consulta General
-4,6,Terapia Física
-5,7,Tomografía
-5,5,Ultrasonido
+id_servicio,nombre_servicio
+1,Consulta General
+2,Rayos X
+3,Análisis de Sangre
+4,Vacunación
+5,Ultrasonido
+6,Terapia Física
+7,Tomografía

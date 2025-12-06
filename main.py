@@ -189,6 +189,26 @@ def dgraph_menu():
                 if choice == 9:
                     id_doctor = input('Ingrese el ID del doctor: ')
                     func(client, id_doctor)
+
+                # Query 11
+                if choice == 11:
+                    int_attr_dict = {
+                        'serv_ids': [1,2,3,4,5,6,7],
+                        'serv_names': ['Consulta General', 'Rayos X', 'Análisis de Sangre', 'Vacunación', 'Ultrasonido', 'Terapia Física', 'Tomografía']
+                    }
+
+                    # Display choices
+                    print('\nServicios Disponibles:')
+                    for i in range(len(int_attr_dict['serv_ids'])):
+                        print(f"{int_attr_dict['serv_ids'][i]}. {int_attr_dict['serv_names'][i]}")
+                    num_attr = int(input('Selecciona un servicio: '))
+
+                    # Map user choice
+                    servicio_id = int_attr_dict['serv_ids'][num_attr-1]
+                    servicio_name = int_attr_dict['serv_names'][num_attr-1]
+
+                    func(client, str(servicio_id), servicio_name)
+
         elif choice == 15:
             client_stub.close()
             break

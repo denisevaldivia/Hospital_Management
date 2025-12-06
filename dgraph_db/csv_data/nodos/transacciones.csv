@@ -1,10 +1,9 @@
-id_transaccion,id_servicio,nombre_servicio,precio
-1001,1,Consulta General,500
-1001,2,Rayos X,900
-1002,4,Vacunación,300
-1003,3,Análisis de Sangre,450
-1004,5,Ultrasonido,1200
-1005,1,Consulta General,500
-1006,6,Terapia Física,1500
-1007,7,Tomografía,2000
-1008,5,Ultrasonido,1200
+id_transaccion,precio,metodo_pago
+1001,500,Efectivo
+1002,300,Transferencia
+1003,450,TC Visa
+1004,1200,TC Mastercard
+1005,500,Efectivo
+1006,1500,Transferencia
+1007,2000,TC Visa
+1008,1200,Efectivo

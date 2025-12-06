@@ -1,6 +1,7 @@
-id_sala,id_doctor,tipo
-10,1,Consulta
-11,2,Emergencia
-12,3,Rayos X
-13,4,Vacunación
-14,5,Control
+id_sala,nombre_sala,tipo
+1,Sala A,Consulta
+2,Sala B,Rayos X
+3,Sala C,Ultrasonido
+4,Sala D,Laboratorio
+5,Sala E,Terapia Física
+6,Sala F,Tomografía

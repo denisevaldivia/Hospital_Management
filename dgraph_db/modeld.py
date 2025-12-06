@@ -16,8 +16,11 @@ def set_schema(client):
         id_visita: int @index(int) .
         id_servicio: int @index(int) .
 
+        fecha_uso : dateTime .
+
         nombre_servicio: string @index(term) .
         precio: float @index(float) .
+        metodo_pago: string .
 
         nombre: string .
         sexo: string @index(hash) .
@@ -73,7 +76,6 @@ def set_schema(client):
             sexo
             fecha_nacimiento
             edad
-            ATIENDE
             SOLICITA
             RECIBE
         }
@@ -82,7 +84,6 @@ def set_schema(client):
             id_sala
             id_doctor
             tipo
-            AGENDA
         }
 
         type Doctor {
@@ -106,7 +107,6 @@ def set_schema(client):
             motivo
             hora_entrada
             hora_salida
-            RECIBE
         }
 
         type Receta {
@@ -118,8 +118,6 @@ def set_schema(client):
             medicina
             cantidad
             frecuencia
-            TIENE
-            OTORGA
         }
     """
     op = pydgraph.Operation(schema=schema)
@@ -314,6 +312,56 @@ def query_10(client):
     }
     """
 
+# Query 11: Transactions by service + total amount
+def query_11(client, id_servicio, name): 
+    query = """
+    query getPrice($id_servicio: int) {
+        transactions(func: eq(id_servicio, $id_servicio)) @filter(has(precio)) {
+            uid
+            id_transaccion
+            nombre_servicio
+            precio
+        }
+    }
+    """
+
+    # Fill out the query
+    variables = {"$id_servicio": id_servicio}
+
+    # Execute the response
+    txn = client.txn(read_only=True)
+    try:
+        # Store the response
+        res = txn.query(query, variables=variables)
+        data = json.loads(res.json)
+
+        # Print the results
+        print()
+        print('=' * 40)
+        
+        if 'transactions' in data:
+            total_precio = 0.0
+            found_transaction = False                   # No transaction found
+
+            # Check if there are transactions
+            for transaction in data['transactions']:
+                found_transaction = True                # Flag Transaction found
+
+                # Sum the price of each transaction
+                total_precio += transaction.get('precio', 0.0)
+
+            if not found_transaction:
+                print(f'No se encontraron transacciones para el Servicio {name}.')
+            
+            # Total price of all transactions, filtered by service
+            print(f'Total de Transacciones para Servicio {name}:\n')
+            print(f'\nGanancia Total de las transacciones para el Servicio {name}: {total_precio}')
+        
+        print('=' * 40)
+
+    finally:
+        txn.discard()
+
 # ------------------------------------
 #   CHECK AND PRINT
 # ------------------------------------
@@ -334,7 +382,6 @@ def query_3(client): pass
 def query_6(client): pass
 def query_7(client): pass
 def query_8(client): pass
-def query_11(client): pass
 def query_12(client): pass
 def query_13(client): pass
 def query_14(client): pass
