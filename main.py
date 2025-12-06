@@ -27,6 +27,7 @@ def cassandra_menu():
         3: modelc.query_3,
         4: modelc.query_4,
         5: modelc.query_5,
+        6: modelc.query_6,
         7: modelc.query_7,
         8: modelc.query_8, 
         9: modelc.query_9,
@@ -98,9 +99,8 @@ def cassandra_menu():
                     tipo = input("Tipo de transacción: ")
                     monto = float(input("Monto: "))
                     metodo = input("Método de pago: ")
-                    folio = input("Folio de transacción (UUID o dejar vacío para generar): ")
                     from uuid import uuid4
-                    folio = folio or uuid4()
+                    folio = uuid4()
                     func(session, (cuenta, fecha, tipo, monto, metodo, folio))
 
                 elif choice == 7:  # Ocupación de sala
@@ -111,26 +111,52 @@ def cassandra_menu():
                     responsable = input("Responsable: ")
                     desc = input("Descripción del evento: ")
                     func(session, (sala, fecha, tipo_sala, estado, responsable, desc))
-                    
-                if choice == 8:  # Query 8
+
+                if choice == 8:  # Prescripciones del paciente
                     exp = input("Expediente del paciente: ")
                     inicio = datetime.fromisoformat(i) if (i := input("Fecha inicio (YYYY-MM-DD) o vacío: ")) else None
                     fin = datetime.fromisoformat(i) if (i := input("Fecha fin (YYYY-MM-DD) o vacío: ")) else None
                     func(session, exp, inicio, fin)
 
-                elif choice == 11:  # Query 11
+                elif choice == 9: # Historial de diagnosticos
+                    exp_input = input("Ingrese los expedientes de los pacientes (separados por coma): ")
+                    # Convertir a lista y eliminar espacios
+                    exp_list = [e.strip() for e in exp_input.split(",") if e.strip()]
+                    if exp_list:
+                        modelc.query_9(session, exp_list)
+                    else:
+                        print("No se ingresaron expedientes válidos.")
+
+                elif choice == 10:  # Donaciones
+                    exp = input("Expediente del Donador: ")
+                    inicio = datetime.fromisoformat(i) if (i := input("Fecha inicio (YYYY-MM-DD) o vacío: ")) else None
+                    fin = datetime.fromisoformat(i) if (i := input("Fecha fin (YYYY-MM-DD) o vacío: ")) else None
+                    tipo = input("Tipo de sangre o vacío: ") or None
+                    func(session, exp, inicio, fin, tipo)
+
+                elif choice == 11:  # Vacunas del paciente
                     exp = input("Expediente del paciente: ")
                     inicio = datetime.fromisoformat(i) if (i := input("Fecha inicio (YYYY-MM-DD) o vacío: ")) else None
                     fin = datetime.fromisoformat(i) if (i := input("Fecha fin (YYYY-MM-DD) o vacío: ")) else None
                     tipo = input("Tipo de vacuna o vacío: ") or None
                     func(session, exp, inicio, fin, tipo)
 
-                elif choice == 12:  # Query 12
+                elif choice == 12:  # Visitas de un paciente
                     exp = input("Expediente del paciente: ")
                     inicio = datetime.fromisoformat(i) if (i := input("Fecha inicio (YYYY-MM-DD) o vacío: ")) else None
                     fin = datetime.fromisoformat(i) if (i := input("Fecha fin (YYYY-MM-DD) o vacío: ")) else None
                     func(session, exp, inicio, fin)
-                    # func(session)
+                
+                elif choice == 13: # Transacciones de la cuenta
+                    cuenta = input("Ingrese la cuenta a consultar: ")
+                    func(session, cuenta)
+                
+                if choice == 14:  # Logs de la sala
+                    id_sala = input("ID Sala: ")
+                    inicio = datetime.fromisoformat(i) if (i := input("Fecha inicio (YYYY-MM-DD) o vacío: ")) else None
+                    fin = datetime.fromisoformat(i) if (i := input("Fecha fin (YYYY-MM-DD) o vacío: ")) else None
+                    func(session, id_sala, inicio, fin)
+
         elif choice == 15:
             cluster.shutdown()
             break
@@ -193,7 +219,7 @@ def mongo_menu():
 #   DGRAPH
 # ------------------------------------
 import pydgraph
-from dgraph_db import modeld, populated, populated2, populate3
+from dgraph_db import modeld,populated2
 
 DGRAPH_URI = os.getenv('DGRAPH_URI', 'localhost:9080')
 
