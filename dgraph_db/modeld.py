@@ -130,7 +130,7 @@ def set_schema(client):
 def query_4(client, id_paciente): 
     query = """
     query getDoctors($id_paciente: int) {
-        patient(func: eq(id_paciente, $id_paciente)) {
+        patient(func: eq(id_paciente, $id_paciente)) @filter(has(nombre)) {
             uid
             paciente_id
             nombre
@@ -162,30 +162,36 @@ def query_4(client, id_paciente):
         data = json.loads(res.json)
 
         # Print the results
+        print()
+        print('=' * 40)
+        print('Doctores que han atendido a un Paciente:\n')
         if 'patient' in data:
+            found_patient = False                    # No patient has been found
             for patient in data['patient']:
-                print(f"\nQuery 4 Results:")
-                print(f"Paciente: {patient.get('nombre')}")
-                print(f"Sexo: {patient.get('sexo')}")
-                print(f"Fecha de Nacimiento: {patient.get('fecha_nacimiento')}")
-                print(f"Edad: {patient.get('edad')}")
+                found_patient = True                 # A patient has been found
+                # Attributes of Patient nodes
+                for field in ['nombre', 'sexo', 'fecha_nacimiento', 'edad']:
+                    check_before_print(patient, field)
+                
+                # Doctors
                 print('Doctores que le han atendido:')
-                # Check if 'doctores' exists and is a list
                 doctores = patient.get('doctores', [])
+
+                # Check if 'doctores' exists and is a list
                 if doctores:
-                    for doctor in doctores:
-                        print(f"  - Doctor: {doctor.get('nombre')}")
-                        print(f"    Especialidad: {doctor.get('especialidad')}")
-                        print(f"    Licencia: {doctor.get('licencia')}")
-                        print(f"    Años de Experiencia: {doctor.get('anios_experiencia')}")
-                        print(f"    Correo: {doctor.get('correo')}")
-                        print(f"    Teléfono: {doctor.get('telefono')}")
+                    for index, doctor in enumerate(doctores):
+                        if index > 0:
+                            print()
+                        for field in ['nombre', 'especialidad', 'licencia', 'anios_experiencia', 'correo', 'telefono']:
+                            check_before_print(doctor, field, indent_level=1)
                 else:
                     print("  No doctors found.")
+            if not found_patient:
+                print(f'No patients found for ID {id_paciente}.')
+        print('=' * 40)
+
     finally:
         txn.discard()
-
-import json
 
 # Query 5: Show all rooms a doctor has booked
 def query_5(client, id_doctor):
@@ -278,33 +284,15 @@ def query_9(client, id_doctor):
         txn.discard()
 
 # ------------------------------------
-#   PRINT RECURSIVE
+#   CHECK AND PRINT
 # ------------------------------------
 
-def pretty_print_recursive(data, indent=0, seen_uids=None):
-    if seen_uids is None:
-        seen_uids = set()  # Initialize the set to track printed entities by UID
-
-    if isinstance(data, dict):
-        for key, value in data.items():
-            if isinstance(value, list):
-                # Handle list of entities (like doctors or rooms)
-                for item in value:
-                    # Check if this item has a UID and whether we've already printed it
-                    item_uid = item.get('uid')
-                    if item_uid and item_uid not in seen_uids:
-                        seen_uids.add(item_uid)  # Mark this item as seen
-                        print(f"{' ' * indent}{key.capitalize()}:")  # Print the relationship header (e.g., "Salas:")
-                        pretty_print_recursive(item, indent + 2, seen_uids)  # Recursively print the item
-            else:
-                # For key-value pairs, print normally (skip 'uid')
-                if key != 'uid':
-                    print(f"{' ' * indent}{key.capitalize()}: {value}")
-    elif isinstance(data, list):
-        # Process a list of items (e.g., doctors, rooms, etc.)
-        for item in data:
-            pretty_print_recursive(item, indent, seen_uids)  # No need to check for 'uid' here
-
+def check_before_print(data, field_name, indent_level=0):
+    value = data.get(field_name)
+    # Only print if values exist
+    if value:
+        indent = '    ' * indent_level             # Indentation
+        print(f"{indent}{field_name.replace('_', ' ').capitalize()}: {value}")
 
 # ------------------------------------
 #   QUERIES VACÍAS
