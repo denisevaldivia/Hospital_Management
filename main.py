@@ -131,7 +131,7 @@ def mongo_menu():
 #   DGRAPH
 # ------------------------------------
 import pydgraph
-from dgraph_db import modeld, populated, populated2, populate3
+from dgraph_db import modeld, populated2
 
 DGRAPH_URI = os.getenv('DGRAPH_URI', 'localhost:9080')
 
@@ -186,9 +186,32 @@ def dgraph_menu():
                 if choice == 5:
                     id_doctor = input('Ingrese el ID del doctor: ')
                     func(client, id_doctor)
+                if choice == 6:
+                    func(client)
+                if choice == 7:
+                    func(client)
+                if choice == 8:
+                    func(client)
                 if choice == 9:
                     id_doctor = input('Ingrese el ID del doctor: ')
                     func(client, id_doctor)
+
+                # Query 10
+                if choice == 10:
+                    int_attr_dict = {
+                        'numbers': [1,2,3,4,5,6],
+                        'diagnosis': ['Gripe', 'Alergia', 'Fractura', 'Infección', 'Resfriado', 'Dengue']
+                        }
+                    
+                    # Display choices
+                    print('\nDiagnósticos Disponibles:')
+                    for i in range(len(int_attr_dict['numbers'])):
+                        print(f"{int_attr_dict['numbers'][i]}. {int_attr_dict['diagnosis'][i]}")
+                    num_attr = int(input('Selecciona un diagnóstico: '))
+
+                    # Map choice & execute
+                    diagnosis = int_attr_dict['diagnosis'][num_attr-1]
+                    func(client, diagnosis)
 
                 # Query 11
                 if choice == 11:
@@ -207,7 +230,7 @@ def dgraph_menu():
                     servicio_id = int_attr_dict['serv_ids'][num_attr-1]
                     servicio_name = int_attr_dict['serv_names'][num_attr-1]
 
-                    func(client, str(servicio_id), servicio_name)
+                    
 
         elif choice == 15:
             client_stub.close()

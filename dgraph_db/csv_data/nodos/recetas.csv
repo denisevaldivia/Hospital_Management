@@ -5,3 +5,6 @@ id_receta,id_paciente,id_doctor,diagnostico,fecha_emision,medicina,cantidad,frec
 503,3,4,Infección,2025-01-09,Amoxicilina,21,3
 504,4,2,Resfriado,2025-01-11,Cetirizina,10,1
 505,5,5,Dengue,2025-02-15,Ibuprofeno,10,2
+506,4,1,Gripe,2025-01-07,Paracetamol,10,3
+507,2,4,Gripe,2025-02-01,Agrifen,15,3
+508,5,2,Alergia,2025-03-24,Loratadina,6,2

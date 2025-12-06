@@ -259,6 +259,70 @@ def query_5(client, id_doctor):
     finally:
         txn.discard()
 
+# Query 7: Hospital Rooms Most Occupied
+def query_7(client): 
+    query = """
+    {
+        salas(func: type(Sala)) {
+            uid
+            id_sala
+            tipo
+            ocupacion: count(~AGENDA)
+        }
+    }
+    """
+    # Execute the query
+    txn = client.txn(read_only=True)
+    
+    try:
+        res = txn.query(query)                              # Query
+        data = json.loads(res.json.decode('utf-8'))         # Response
+    finally:
+        txn.discard() 
+
+    # Get all rooms
+    salas = data.get("salas", [])
+    # Order rooms
+    salas = sorted(salas, key=lambda x: x.get("ocupacion", 0), reverse=True)
+
+    print()
+    print('=' * 40)
+    for sala in salas:
+        print(f"Ocupación: {sala.get('ocupacion')} | Tipo de Sala: {sala.get('tipo')} ")
+    print('=' * 40)
+    print()
+
+# Query 8: Show services sorted by patient demand
+def query_8(client): 
+    query = """
+    {
+        servicios(func: type(Servicio)) {
+            uid
+            id_servicio
+            nombre_servicio
+            demanda: count(~SOLICITA)
+        }
+    }
+    """
+    # Execute the query
+    txn = client.txn(read_only=True)
+    
+    try:
+        res = txn.query(query)                              # Query
+        data = json.loads(res.json.decode('utf-8'))         # Response
+    finally:
+        txn.discard() 
+
+    servicios = data.get("servicios", [])
+    servicios = sorted(servicios, key=lambda x: x.get("demanda", 0), reverse=True)
+
+    print()
+    print('=' * 40)
+    for svc in servicios:
+        print(f"Demanda: {svc.get('demanda')} | Nombre del Servicio: {svc.get('nombre_servicio')}")    
+    print('=' * 40)
+    print()
+
 # Query 9: Show number of patients a doctor has
 def query_9(client, id_doctor):
     query = """
@@ -303,23 +367,68 @@ def query_9(client, id_doctor):
         txn.discard()
 
 # Query 10: Number of prescriptions doctors have given by diagnosis
-def query_10(client): 
+def query_10(client, diagnosis): 
     query = """
-    query countPatients($id_doctor: string) {
-        patient_count(func: type(Paciente)) @filter(has(ATIENDE)) {
-            uid
-            ATIENDE @filter(eq(id_doctor, $id_doctor)) {
-                uid
+    query countPrescriptions($diagnosis: string) {
+        recetas(func: eq(diagnostico, $diagnosis)) {
+            id_receta
+            doctor_name: ~OTORGA {
+                id_doctor
+                nombre
             }
         }
     }
     """
 
+    # Define variables for query substitution
+    variables = {"$diagnosis": diagnosis}
+
+    # Execute the query
+    txn = client.txn(read_only=True)
+    try:
+        # Query the database
+        res = txn.query(query, variables=variables)
+
+        # Store the response
+        data = json.loads(res.json.decode('utf-8'))
+
+        # Check if there are any prescriptions
+        if 'recetas' in data and len(data['recetas']) > 0:
+            print()
+            print('=' * 40)
+            print(f"\nNúmero de Recetas para diagnóstico: {diagnosis}\n")
+            
+            # Create a dictionary to count recipes per doctor
+            doctor_recipes_count = {}
+
+            # Loop through the recipes and count the prescriptions per doctor
+            for receta in data['recetas']:
+                if receta.get('doctor_name'):
+                    doctor_name = receta['doctor_name'][0].get('nombre', 'Desconocido')
+                    # Increment the recipe count for that doctor
+                    if doctor_name in doctor_recipes_count:
+                        doctor_recipes_count[doctor_name] += 1
+                    else:
+                        doctor_recipes_count[doctor_name] = 1
+
+            # Print the result for each doctor
+            for doctor_name, count in doctor_recipes_count.items():
+                print(f"Doctor: {doctor_name}, Número de diagnósticos para {diagnosis}: {count}")
+
+            print()
+            print('=' * 40)
+        else:
+            print(f"No se encontraron recetas con el diagnóstico '{diagnosis}'.")
+    
+    finally:
+        txn.discard()
+
+#! REVISITAR
 # Query 11: Transactions by service + total amount
 def query_11(client, id_servicio, name): 
     query = """
     {
-        servicio(func: eq(id_servicio, $id_servicio))
+        servicio(func: eq(id_servicio, $id_servicio)) {
             id_servicio
             nombre_servicio
             GENERA {
@@ -328,13 +437,14 @@ def query_11(client, id_servicio, name):
                 nombre_servicio
                 precio
             }
+        }
     }
     """
 
     # Fill out the query
     variables = {"$id_servicio": id_servicio}
 
-    # Execute the response
+    # Execute the query
     txn = client.txn(read_only=True)
     try:
         # Store the response
@@ -346,18 +456,23 @@ def query_11(client, id_servicio, name):
         transactions = servicio.get('GENERA', [])
 
         # Calculate total earnings
-        total_precio = sum(transaction.get('precio', 0.0) for transaction in transactions)
+        if transactions: 
+            total_precio = sum(transaction.get('precio', 0.0) for transaction in transactions)
+        else:
+            total_precio = 0.0
+        
 
         # Print the results
         print()
         print('=' * 40)
         print(f'Total de Transacciones para Servicio {name}:\n')
         print(f'\nGanancia Total de las transacciones para el Servicio {name}: {total_precio}')
-        
         print('=' * 40)
 
     finally:
         txn.discard()
+
+
 
 # ------------------------------------
 #   CHECK AND PRINT
@@ -377,10 +492,8 @@ def query_1(client): pass
 def query_2(client): pass
 def query_3(client): pass
 def query_6(client): pass
-def query_7(client): pass
-def query_8(client): pass
+
+
 def query_12(client): pass
 def query_13(client): pass
 def query_14(client): pass
-
-# HACER 4, 5 Y 9
