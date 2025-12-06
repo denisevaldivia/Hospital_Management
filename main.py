@@ -147,42 +147,42 @@ def dgraph_menu():
     modeld.set_schema(client)
 
     dgraph_queries = {
-        2: modeld.query_1,
-        3: modeld.query_2,
-        4: modeld.query_3,
-        5: modeld.query_4,
-        6: modeld.query_5, 
-        7: modeld.query_6,
-        8: modeld.query_7,
-        9: modeld.query_8,
-        10: modeld.query_9,
-        11: modeld.query_10,
-        12: modeld.query_11,
-        13: modeld.query_12,
-        14: modeld.query_13,
-        15: modeld.query_14,
+        1: modeld.query_1,
+        2: modeld.query_2,
+        3: modeld.query_3,
+        4: modeld.query_4,
+        5: modeld.query_5, 
+        6: modeld.query_6,
+        7: modeld.query_7,
+        8: modeld.query_8,
+        9: modeld.query_9,
+        10: modeld.query_10,
+        11: modeld.query_11,
+        12: modeld.query_12,
+        13: modeld.query_13,
+        14: modeld.query_14,
     }
 
     while True:
         print("\n--- DGRAPH MENU ---")
-        print("1. Populate data")
-        for i in range(2, 16):
-            print(f"{i}. Query {i-1}")
-        print("16. Back to main menu")
+        print("0. Populate data")
+        for i in range(1, 15):
+            print(f"{i}. Query {i}")
+        print("15. Back to main menu")
 
         choice = int(input("Select an option: "))
-        if choice == 1:
+        if choice == 0:
             populated.populate_data(client)
-        elif 2 <= choice <= 15:
+        elif 1 <= choice <= 14:
             func = dgraph_queries.get(choice)
             if func:
-                if choice == 5:
+                if choice == 4:
                     id_paciente = input('Ingrese el ID del paciente: ')
                     func(client, id_paciente)
-                if choice == 6:
+                if choice == 5:
                     id_doctor = input('Ingrese el ID del doctor: ')
                     func(client, id_doctor)
-                if choice == 10:
+                if choice == 9:
                     id_doctor = input('Ingrese el ID del doctor: ')
                     func(client, id_doctor)
         elif choice == 16:
