@@ -287,7 +287,7 @@ def populate_data(client):
     transacciones_uid = load_transacciones('dgraph_db/csv_data/nodos/transacciones.csv')
     recetas_uid = load_recetas('dgraph_db/csv_data/nodos/recetas.csv')
     visitas_uid = load_visitas('dgraph_db/csv_data/nodos/visitas.csv')
-    salas_uid = visitas_uid = load_visitas('dgraph_db/csv_data/nodos/salas.csv')
+    salas_uid = load_salas('dgraph_db/csv_data/nodos/salas.csv')
 
     create_atiende_edges('dgraph_db/csv_data/relaciones/atiende_doctor_paciente.csv', doctores_uid, pacientes_uid)
     create_otorga_edges('dgraph_db/csv_data/relaciones/otorga_doctor_receta.csv', doctores_uid, recetas_uid)

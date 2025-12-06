@@ -174,7 +174,7 @@ def dgraph_menu():
         choice = int(input("Selecciona una opción: "))
         # Populate DB
         if choice == 0:
-            populate3.populate_data(client)
+            populated2.populate_data(client)
 
         # Queries
         elif 1 <= choice <= 14:
