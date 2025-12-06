@@ -185,9 +185,9 @@ def query_4(client, id_paciente):
                         for field in ['nombre', 'especialidad', 'licencia', 'anios_experiencia', 'correo', 'telefono']:
                             check_before_print(doctor, field, indent_level=1)
                 else:
-                    print("  No doctors found.")
+                    print("  No se encontraron doctores.")
             if not found_patient:
-                print(f'No patients found for ID {id_paciente}.')
+                print(f'No se ha encontrado un Paciente con ID {id_paciente}.')
         print('=' * 40)
 
     finally:
@@ -218,33 +218,45 @@ def query_5(client, id_doctor):
 
     # Execute the query
     txn = client.txn(read_only=True)
+
     try:
-        # Query the database
+        # Store the response
         res = txn.query(query, variables=variables)
-        
-        # Decode and load the JSON response
-        data = json.loads(res.json.decode('utf-8'))
-        doctor_data = data.get('doctor', [])
+        data = json.loads(res.json)
 
-        # Grab the second entry, which contains the full doctor data
-        doctor = doctor_data[1] if len(doctor_data) > 1 else None
+        # Print the results
+        print()
+        print('=' * 40)
+        print('Salas agendadas por Doctor:\n')
 
-        if doctor:
-            print(f"Doctor: {doctor['nombre']} ({doctor['especialidad']})")
-            print(f"Licencia: {doctor['licencia']}")
-            print(f"Años de Experiencia: {doctor['anios_experiencia']}")
-            print(f"Correo: {doctor['correo']}")
-            print(f"Teléfono: {doctor['telefono']}")
-            print("Salas agendadas:")
+        if 'doctor' in data:
+            found_doctor = False                # No doctor found
+            found_room = False                  # No room found
+            for doctor in data['doctor']:
+                found_doctor = True             # Doctor found
 
-            # Check if the doctor has booked any rooms
-            if 'salas' in doctor:
-                for sala in doctor['salas']:
-                    print(f"  ID Sala: {sala['id_sala']} \n  Tipo: {sala['tipo']}")
-            else:
-                print("  Ninguna sala ha sido agendada.")
-        else:
-            print(f"No se encontró información válida para id_doctor {id_doctor}.")
+                # Print Doctor
+                for field in ['nombre', 'especialidad', 'licencia', 'anios_experiencia', 'correo', 'telefono']:
+                    check_before_print(doctor, field)
+
+                # Check if the doctor has booked any rooms
+                salas = doctor.get('salas', [])
+                
+                # Print Rooms
+                if salas:
+                    found_room = True
+                    print("Salas agendadas:\n")
+                    for index, sala in enumerate(salas):
+                        if index > 0:
+                            print()
+                        for field in ['id_sala', 'tipo']:
+                            check_before_print(sala, field, indent_level=1)
+                if not found_room:
+                    print("  No se han agendado salas.")
+                
+            if not found_doctor:
+                print(f'No se ha encontrado un Doctor con ID {id_doctor}.')
+        print('=' * 40)
     
     finally:
         txn.discard()
@@ -253,9 +265,10 @@ def query_5(client, id_doctor):
 def query_9(client, id_doctor):
     query = """
     query countPatients($id_doctor: string) {
-        patient_count(func: type(Paciente)) @filter(has(ATIENDE)) {
+        patient_count(func: type(Paciente)) @filter(has(nombre)) {
             uid
-            ATIENDE @filter(eq(id_doctor, $id_doctor)) {
+            nombre
+            ~ATIENDE @filter(eq(id_doctor, $id_doctor)) {
                 uid
             }
         }
@@ -271,17 +284,35 @@ def query_9(client, id_doctor):
         # Query the database
         res = txn.query(query, variables=variables)
         
-        # Decode and load the JSON response
-        data = json.loads(res.json.decode('utf-8'))
+        # Store the response
+        data = json.loads(res.json)
 
         # Extract the list of patient nodes with the specific doctor relationship
         pacientes = data.get('patient_count', [])
 
+        # Filter valid patients
+        valid_patients = [p for p in pacientes if any(d['id_doctor'] == id_doctor for d in p.get('~ATIENDE', []))]
+
         # Print the number of patients related to the doctor
-        print(f"Número de Pacientes que atiende el Doctor con ID {id_doctor}: {len(pacientes)}")
-    
+        print('=' * 40)
+        print(f"\nNúmero de Pacientes que atiende el Doctor con ID {id_doctor}: {len(valid_patients)}\n")
+        print('=' * 40)
+
     finally:
         txn.discard()
+
+# Query 10: Number of prescriptions doctors have given by diagnosis
+def query_10(client): 
+    query = """
+    query countPatients($id_doctor: string) {
+        patient_count(func: type(Paciente)) @filter(has(ATIENDE)) {
+            uid
+            ATIENDE @filter(eq(id_doctor, $id_doctor)) {
+                uid
+            }
+        }
+    }
+    """
 
 # ------------------------------------
 #   CHECK AND PRINT
@@ -303,7 +334,6 @@ def query_3(client): pass
 def query_6(client): pass
 def query_7(client): pass
 def query_8(client): pass
-def query_10(client): pass
 def query_11(client): pass
 def query_12(client): pass
 def query_13(client): pass

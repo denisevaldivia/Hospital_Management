@@ -147,34 +147,38 @@ def dgraph_menu():
     modeld.set_schema(client)
 
     dgraph_queries = {
-        1: modeld.query_1,
-        2: modeld.query_2,
-        3: modeld.query_3,
-        4: modeld.query_4,
-        5: modeld.query_5, 
-        6: modeld.query_6,
-        7: modeld.query_7,
-        8: modeld.query_8,
-        9: modeld.query_9,
-        10: modeld.query_10,
-        11: modeld.query_11,
-        12: modeld.query_12,
-        13: modeld.query_13,
-        14: modeld.query_14,
+        1: (modeld.query_1, 'Registrar a un nuevo doctor'),
+        2: (modeld.query_2, 'Registrar a un nuevo paciente'),
+        3: (modeld.query_3, 'Registrar a una visita'),
+        4: (modeld.query_4, 'Mostrar los doctores que atienden a un paciente'),
+        5: (modeld.query_5, 'Mostrar las salas que ha agendado un doctor'), 
+        6: (modeld.query_6, 'Mostrar los doctores con mayor demanda'),
+        7: (modeld.query_7, 'Mostrar las salas de hospital con mayor demanda'),
+        8: (modeld.query_8, 'Mostrar los servicios con mayor demanda'),
+        9: (modeld.query_9, 'Consultar cuántos pacientes atiende un doctor'),
+        10: (modeld.query_10, 'Consultar el total de recetas que han emitido los doctores según un diagnóstico'),
+        11: (modeld.query_11, 'Consultar la ganancia total de cada servicio'),
+        12: (modeld.query_12, 'Consultar las visitas de un paciente (y filtrar según el motivo)'),
+        13: (modeld.query_13, 'Consultar los diagnósticos que reciben pacientes mayores a 50 años'),
+        14: (modeld.query_14, 'Consultar los 3 doctores con mayor experiencia registrados en el hospital'),
     }
 
     while True:
         print("\n--- DGRAPH MENU ---")
         print("0. Populate data")
         for i in range(1, 15):
-            print(f"{i}. Query {i}")
-        print("15. Back to main menu")
+            _, desc = dgraph_queries[i]
+            print(f"{i}. {desc}")
+        print("15. Regresar al menú principal")
 
-        choice = int(input("Select an option: "))
+        choice = int(input("Selecciona una opción: "))
+        # Populate DB
         if choice == 0:
             populate3.populate_data(client)
+
+        # Queries
         elif 1 <= choice <= 14:
-            func = dgraph_queries.get(choice)
+            func, _ = dgraph_queries.get(choice)
             if func:
                 if choice == 4:
                     id_paciente = input('Ingrese el ID del paciente: ')
