@@ -157,10 +157,27 @@ def query_4(client, id_paciente):
         res = txn.query(query, variables=variables)
         data = json.loads(res.json)
 
-        # Return Data
-        print(f"\nQuery 4 Results:")
-        pretty_print_recursive(data)
-        
+        # Print the results
+        if 'patient' in data:
+            for patient in data['patient']:
+                print(f"\nQuery 4 Results:")
+                print(f"Paciente: {patient.get('nombre')}")
+                print(f"Sexo: {patient.get('sexo')}")
+                print(f"Fecha de Nacimiento: {patient.get('fecha_nacimiento')}")
+                print(f"Edad: {patient.get('edad')}")
+                print('Doctores que le han atendido:')
+                # Check if 'doctores' exists and is a list
+                doctores = patient.get('doctores', [])
+                if doctores:
+                    for doctor in doctores:
+                        print(f"  - Doctor: {doctor.get('nombre')}")
+                        print(f"    Especialidad: {doctor.get('especialidad')}")
+                        print(f"    Licencia: {doctor.get('licencia')}")
+                        print(f"    Años de Experiencia: {doctor.get('anios_experiencia')}")
+                        print(f"    Correo: {doctor.get('correo')}")
+                        print(f"    Teléfono: {doctor.get('telefono')}")
+                else:
+                    print("  No doctors found.")
     finally:
         txn.discard()
 

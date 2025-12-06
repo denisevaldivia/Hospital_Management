@@ -131,7 +131,7 @@ def mongo_menu():
 #   DGRAPH
 # ------------------------------------
 import pydgraph
-from dgraph_db import modeld, populated
+from dgraph_db import modeld, populated, populated2
 
 DGRAPH_URI = os.getenv('DGRAPH_URI', 'localhost:9080')
 
@@ -172,7 +172,7 @@ def dgraph_menu():
 
         choice = int(input("Select an option: "))
         if choice == 0:
-            populated.populate_data(client)
+            populated2.populate_data(client)
         elif 1 <= choice <= 14:
             func = dgraph_queries.get(choice)
             if func:
@@ -185,7 +185,7 @@ def dgraph_menu():
                 if choice == 9:
                     id_doctor = input('Ingrese el ID del doctor: ')
                     func(client, id_doctor)
-        elif choice == 16:
+        elif choice == 15:
             client_stub.close()
             break
         else:
