@@ -1,6 +1,7 @@
 import os
 import sys
 from datetime import datetime
+from cassandra.util import uuid_from_time
 
 
 # ------------------------------------
@@ -50,6 +51,67 @@ def cassandra_menu():
         elif 1 <= choice <= 14:
             func = cassandra_queries.get(choice)
             if func:
+                if choice == 1:  # Prescripción
+                    exp = input("Expediente del paciente: ")
+                    fecha = uuid_from_time(datetime.now())  # Podrías permitir que el usuario ingrese la fecha
+                    doctor = input("Doctor responsable: ")
+                    meds = input("Medicamentos indicados: ")
+                    obs = input("Observaciones: ")
+                    func(session, (exp, fecha, doctor, meds, obs))
+
+                elif choice == 2:  # Historial médico
+                    exp = input("Expediente del paciente: ")
+                    fecha = uuid_from_time(datetime.now())
+                    desc = input("Descripción del diagnóstico: ")
+                    obs = input("Observaciones: ")
+                    doctor = input("Doctor responsable: ")
+                    func(session, (exp, fecha, desc, obs, doctor))
+
+                elif choice == 3:  # Donación de sangre
+                    exp = input("Expediente del donador: ")
+                    fecha = uuid_from_time(datetime.now())
+                    tipo = input("Tipo de sangre: ")
+                    nombre = input("Nombre del donador: ")
+                    cant = float(input("Cantidad extraída (ml): "))
+                    func(session, (exp, fecha, tipo, nombre, cant))
+
+                elif choice == 4:  # Vacuna
+                    exp = input("Expediente del paciente: ")
+                    fecha = uuid_from_time(datetime.now())
+                    tipo = input("Tipo/nombre de la vacuna: ")
+                    dosis = input("Dosis administrada: ")
+                    lote = input("Lote: ")
+                    func(session, (exp, fecha, tipo, dosis, lote))
+
+                elif choice == 5:  # Visita
+                    exp = input("Expediente del paciente: ")
+                    fecha = uuid_from_time(datetime.now())
+                    nombre = input("Nombre del visitante: ")
+                    motivo = input("Motivo de la visita: ")
+                    dur = int(input("Duración estimada (minutos): "))
+                    relacion = input("Relación con el paciente: ")
+                    func(session, (exp, fecha, nombre, motivo, dur, relacion))
+
+                elif choice == 6:  # Transacción
+                    cuenta = input("Cuenta: ")
+                    fecha = uuid_from_time(datetime.now())
+                    tipo = input("Tipo de transacción: ")
+                    monto = float(input("Monto: "))
+                    metodo = input("Método de pago: ")
+                    folio = input("Folio de transacción (UUID o dejar vacío para generar): ")
+                    from uuid import uuid4
+                    folio = folio or uuid4()
+                    func(session, (cuenta, fecha, tipo, monto, metodo, folio))
+
+                elif choice == 7:  # Ocupación de sala
+                    sala = input("ID de la sala: ")
+                    fecha = uuid_from_time(datetime.now())
+                    tipo_sala = input("Tipo de sala: ")
+                    estado = input("Estado del evento/procedimiento: ")
+                    responsable = input("Responsable: ")
+                    desc = input("Descripción del evento: ")
+                    func(session, (sala, fecha, tipo_sala, estado, responsable, desc))
+                    
                 if choice == 8:  # Query 8
                     exp = input("Expediente del paciente: ")
                     inicio = datetime.fromisoformat(i) if (i := input("Fecha inicio (YYYY-MM-DD) o vacío: ")) else None

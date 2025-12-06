@@ -126,12 +126,74 @@ def drop_schema(session):
 #   QUERIES VACÍAS
 # ------------------------------------
 
-def query_1(session): pass
-def query_2(session): pass
-def query_3(session): pass
-def query_4(session): pass
-def query_5(session): pass
-def query_7(session): pass
+def query_1(session, params):
+    query = """INSERT INTO prescriptions_by_patient 
+            (exp_paciente, fecha_creacion, doctor_responsable, medicamentos, observaciones) 
+            VALUES (?, ?, ?, ?, ?)"""
+
+    # Preparar y ejecutar
+    stmt = session.prepare(query)
+    rows = session.execute(stmt, params)
+
+    # Mostrar resultados
+    print(f"\n=== Se añadío la nueva prescripción con éxito ===")
+
+def query_2(session, params):
+    query = """INSERT INTO historial_by_patient 
+               (exp_paciente, fecha_diagnostico, descripcion, observaciones, doctor_responsable) 
+               VALUES (?, ?, ?, ?, ?)"""
+    
+    stmt = session.prepare(query)
+    session.execute(stmt, params)
+    print("\n=== Se añadió el nuevo diagnóstico/historial médico con éxito ===")
+
+def query_3(session, params):
+    query = """INSERT INTO blood_donation_by_patient 
+               (exp_donador, fecha_donacion, tipo_sangre, nombre, cantidad) 
+               VALUES (?, ?, ?, ?, ?)"""
+    
+    stmt = session.prepare(query)
+    session.execute(stmt, params)
+    print("\n=== Se añadió la nueva donación de sangre con éxito ===")
+
+def query_4(session, params):
+    query = """INSERT INTO vaccines_by_patient 
+               (exp_paciente, fecha_vacuna, tipo_vacuna, dosis, lote) 
+               VALUES (?, ?, ?, ?, ?)"""
+    
+    stmt = session.prepare(query)
+    session.execute(stmt, params)
+    print("\n=== Se añadió la nueva vacuna con éxito ===")
+
+def query_5(session, params):
+    query = """INSERT INTO logs_by_visit 
+               (exp_paciente, fecha_visita, nombre_visitante, motivo, duracion, relacion_paciente) 
+               VALUES (?, ?, ?, ?, ?, ?)"""
+    
+    stmt = session.prepare(query)
+    session.execute(stmt, params)
+    print("\n=== Se añadió la nueva visita con éxito ===")
+
+# 6. Transacciones por cuenta (ya lo tenías con logs_by_transactions)
+def query_6(session, params):
+    query = """INSERT INTO logs_by_transactions 
+               (cuenta, fecha_pago, tipo_transaccion, monto, metodo_pago, folio) 
+               VALUES (?, ?, ?, ?, ?, ?)"""
+    
+    stmt = session.prepare(query)
+    session.execute(stmt, params)
+    print("\n=== Se añadió la nueva transacción con éxito ===")
+
+# 7. Ocupación de salas
+def query_7(session, params):
+    query = """INSERT INTO logs_by_room 
+               (id_sala, fecha_evento, tipo_sala, estado, responsable, descripcion) 
+               VALUES (?, ?, ?, ?, ?, ?)"""
+    
+    stmt = session.prepare(query)
+    session.execute(stmt, params)
+    print("\n=== Se añadió el nuevo registro de sala con éxito ===")
+
 def query_8(session, exp_paciente, inicio=None, fin=None):
     # Base de la query
     query = """
