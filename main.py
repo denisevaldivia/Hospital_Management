@@ -8,7 +8,7 @@ from cassandra.util import uuid_from_time
 #   CASSANDRA 
 # ------------------------------------
 from cassandra.cluster import Cluster
-from cassandra_db import modelc, populatec                # This can be aliased --> as <name>
+from cassandra_db import modelc, populatec                
 
 CLUSTER_IPS = os.getenv('CASSANDRA_CLUSTER_IPS', '127.0.0.1')
 KEYSPACE = os.getenv('CASSANDRA_KEYSPACE', 'logistics')
@@ -42,15 +42,16 @@ def cassandra_menu():
         print("\n--- CASSANDRA MENU ---")
         print("0. Populate data")
         for i in range(1, 15):
-            print(f"{i}. Query {i}")
-        print("15. Back to main menu")
+            _, desc = cassandra_queries[i]
+            print(f"{i}. {desc}")
+        print("15. Regresar al menú principal")
         print("404. Drop all tables")
 
-        choice = int(input("Select an option: "))
+        choice = int(input("Selecciona una opción: "))
         if choice == 0:
             populatec.bulk_insert(session)
         elif 1 <= choice <= 14:
-            func = cassandra_queries.get(choice)
+            func, _ = cassandra_queries.get(choice)
             if func:
                 if choice == 1:  # Prescripción
                     exp = input("Expediente del paciente: ")
@@ -195,14 +196,15 @@ def mongo_menu():
         print("\n--- MONGODB MENU ---")
         print("1. Populate data")
         for i in range(2, 14):
-            print(f"{i}. Query {i-1}")
-        print("14. Back to main menu")
+            _, desc = mongo_queries[i]
+            print(f"{i}. {desc}")
+        print("14. Regresar al menú principal")
 
-        choice = int(input("Select an option: "))
+        choice = int(input("Selecciona una opción: "))
         if choice == 1:
             populatem.populate_data(db)
         elif 2 <= choice <= 13:
-            func = mongo_queries.get(choice)
+            func, _ = mongo_queries.get(choice)
             if func:
                 func(db)
             else:
@@ -370,7 +372,6 @@ def main():
         elif choice == "2":
             mongo_menu()
         elif choice == "3":
-            
             dgraph_menu()
         elif choice == "4":
             print("Exiting application of Ganó el Amor...")

@@ -50,6 +50,8 @@ docker run --name ratel-conteiner -d -p 8000:8000 dgraph/ratel:latest
 
 ### • **Correr los contenedores con Docker Compose**
 
+Ejecutar los siguientes comandos desde la raíz del repositorio.
+
 Para la primera ejecución:
 
 &ensp; docker compose up --build

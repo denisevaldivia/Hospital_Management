@@ -5,6 +5,8 @@ falcon
 pymongo
 uvicorn
 requests
+datetime
+pprint
 
 pydgraph
 Faker
