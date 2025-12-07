@@ -461,131 +461,223 @@ def query_10(client, diagnosis):
     finally:
         txn.discard()
 
-#! REVISITAR
 # Query 11: Transactions by service + total amount
 def query_11(client, id_servicio, name): 
     query = """
-    {
-        servicio(func: eq(id_servicio, $id_servicio)) {
-            id_servicio
-            nombre_servicio
-            GENERA {
-                uid
-                id_transaccion
-                nombre_servicio
-                precio
-            }
+    query servicioQuery($id_servicio: int) {
+
+      var(func: eq(id_servicio, $id_servicio)) {
+        sUID as uid
+
+        GENERA {
+          precioVar as precio
         }
+
+        totalPrecio as sum(val(precioVar))
+      }
+
+      ganancias_por_servicio(func: uid(sUID)) {
+        id_servicio
+        nombre_servicio
+        ganancia_total: val(totalPrecio)
+
+        transacciones: GENERA {
+          id_transaccion
+          precio
+        }
+      }
     }
     """
 
-    # Fill out the query
     variables = {"$id_servicio": id_servicio}
 
-    # Execute the query
     txn = client.txn(read_only=True)
     try:
-        # Store the response
         res = txn.query(query, variables=variables)
         data = json.loads(res.json)
 
-        # Get transactions
-        servicio = data.get('servicio', [])[0]  
-        transactions = servicio.get('GENERA', [])
+        servicio_data = data.get("ganancias_por_servicio", [])
+        if not servicio_data:
+            print("No se encontró el servicio.")
+            return
 
-        # Calculate total earnings
-        if transactions: 
-            total_precio = sum(transaction.get('precio', 0.0) for transaction in transactions)
-        else:
-            total_precio = 0.0
-        
+        servicio = servicio_data[0]
+        transacciones = servicio.get("transacciones", [])
+        total_precio = servicio.get("ganancia_total", 0.0)
 
-        # Print the results
+        # Output
         print()
         print('=' * 40)
         print(f'Total de Transacciones para Servicio {name}:\n')
-        print(f'\nGanancia Total de las transacciones para el Servicio {name}: {total_precio}')
+
+        for t in transacciones:
+            print(f" - Transacción {t['id_transaccion']}: ${t['precio']}")
+
+        print(f'\nGanancia Total del Servicio {name}: {total_precio}')
         print('=' * 40)
 
     finally:
         txn.discard()
 
-# Query 12: Show all visits for a patient, as well as the reason
-def query_12(client, id_paciente, motivo=None): 
-    query = """
-    query getVisitas($id_paciente: string, $motivo: string) {
-    paciente(func: eq(id_paciente, $id_paciente)) {
-        uid
-        id_paciente
-        nombre
-        visitas: ~RECIBEN {
-        id_visita
-        fecha
-        motivo
+# Query 12: Show all visits for a patient (no filtering by motivo)
+def query_12(client, id_paciente, motivo):
+    # If no reason was specified
+    if not motivo:
+        query = """
+        query getVisitas($id_paciente: string) {
+            paciente(func: eq(id_paciente, $id_paciente)) {
+                uid
+                id_paciente
+                nombre
+                RECIBE {
+                    id_visita
+                    nombre_visitante
+                    relacion_paciente
+                    motivo
+                    hora_entrada
+                    hora_salida
+                }
+            }
         }
+        """
 
-        visitas_filtradas(func: eq(motivo, $motivo)) {
-        id_visita
-        fecha
-        motivo
-        }
-    }
-    }
-    """
-
-    # Define variables for query substitution
-    variables = {"$id_paciente": id_paciente}
-    if motivo:
-        variables['$motivo'] = motivo
+        # Define the variables 
+        variables = {"$id_paciente": id_paciente}
+    
+    # Filter by motive
     else:
-        variables['$motivo'] = ""
+        query = """
+        query getVisitasbyMotivo($id_paciente: string, $motivo: string) {
+            paciente(func: eq(id_paciente, $id_paciente)) {
+                uid
+                id_paciente
+                nombre
+                RECIBE @filter(eq(motivo, $motivo)) {
+                    id_visita
+                    nombre_visitante
+                    relacion_paciente
+                    motivo
+                    hora_entrada
+                    hora_salida
+                }
+            }
+        }
+        """
+        # Variables para la consulta con motivo
+        variables = {"$id_paciente": id_paciente, "$motivo": motivo}
 
-    # Execute the query
+    # Execute the query 
     txn = client.txn(read_only=True)
     try:
         # Query the database
         res = txn.query(query, variables=variables)
 
-        # Store the response
+        # Store the response data
         data = json.loads(res.json.decode('utf-8'))
 
-        # Check if patient exists
+        # Check if patient exists in the result
         if 'paciente' in data and len(data['paciente']) > 0:
             paciente = data['paciente'][0]
             print()
             print('=' * 40)
-            print()
 
             # Print Patient Data
             print(f"\nInformación del Paciente\n")
             for field in ['id_paciente', 'nombre']:
                 check_before_print(paciente, field)
 
-            # Print All Visits (if no reason is provided)
-            if not motivo: 
-                print(f'\nVisitas Recibidas:\n')
-                visitas = paciente.get('visitas', [])
-                if visitas:
-                    for visita in visitas:
-                        for field in ['id_visita', 'fecha', 'motivo']:
-                            check_before_print(visita, field, indent_level=1)
+            # Print all visits
+            visitas = paciente.get('RECIBE', [])
+            if visitas:
+                # Section Title 
+                if motivo:
+                    print(f'\nVisitas Recibidas con motivo "{motivo}":\n')
                 else:
-                    print('No se encontraron visitas recibidas.')
-            
-            # Print Visits filtered by reason
-            elif motivo:
-                print('\nVisitas Filtradas por Motivo')
-                visitas_filtradas = paciente.get('visitas_filtradas', [])
-                if visitas_filtradas:
-                    for visita in visitas_filtradas:
-                        for field in ['id_visita', 'fecha', 'motivo']:
-                            check_before_print(visita, field, indent_level=1)
-                else:
-                    print(f"No se encontraron visitas con el motivo '{motivo}'.")
-            print()
+                    print(f'\nVisitas Recibidas:\n')
+
+                # Print Data
+                for visita in visitas:
+                    for field in ['id_visita', 'nombre_visitante', 'relacion_paciente', 'motivo', 'hora_entrada', 'hora_salida']:
+                        check_before_print(visita, field, indent_level=1)
+                    print()
+            else:
+                print('No se encontraron visitas recibidas.')
+
             print("=" * 40)
-        else: 
+        else:
             print(f"No se encontraron visitas para el paciente con ID '{id_paciente}'.")
+
+    finally:
+        txn.discard()
+
+# Query 13: Diagnosis of Patients above 50 y/o
+def query_13(client):
+    query = """
+    {
+      pacientes_mayores(func: gt(edad, 50)) {
+        id_paciente
+        nombre
+        edad
+
+        TIENE {
+          id_receta
+          diagnostico
+        }
+      }
+    }
+    """
+
+    txn = client.txn(read_only=True)
+    try:
+        res = txn.query(query)
+        data = json.loads(res.json)
+
+        print("\n=== Diagnósticos de pacientes mayores de 50 años ===\n")
+
+        for p in data.get("pacientes_mayores", []):
+            print(f"Paciente: {p.get('nombre')} (ID: {p.get('id_paciente')}, Edad: {p.get('edad')})")
+            recetas = p.get("TIENE", [])
+
+            if not recetas:
+                print("  - No tiene recetas asociadas\n")
+                continue
+
+            for r in recetas:
+                print(f"  * Receta {r.get('id_receta')}: Diagnóstico → {r.get('diagnostico')}")
+            print()
+
+    finally:
+        txn.discard()
+
+# Query 14: Top 3 doctors filtered by experience years
+def query_14(client):
+    query = """
+    {
+      top_doctores(func: type(Doctor), orderdesc: anios_experiencia, first: 3) {
+        id_doctor
+        nombre
+        especialidad
+        anios_experiencia
+      }
+    }
+    """
+
+    txn = client.txn(read_only=True)
+    try:
+        res = txn.query(query)
+        data = json.loads(res.json)
+
+        print("\n=== Top 3 Doctores con Mayor Experiencia ===\n")
+
+        doctores = data.get("top_doctores", [])
+
+        if not doctores:
+            print("No se encontraron doctores registrados.\n")
+            return
+
+        for i, d in enumerate(doctores, 1):
+            print(f"{i}. Dr. {d.get('nombre')} — {d.get('especialidad')}")
+            print(f"   Años de experiencia: {d.get('anios_experiencia')}\n")
 
     finally:
         txn.discard()
@@ -601,13 +693,9 @@ def check_before_print(data, field_name, indent_level=0):
         indent = '    ' * indent_level             # Indentation
         print(f"{indent}{field_name.replace('_', ' ').capitalize()}: {value}")
 
-# ------------------------------------
-#   QUERIES VACÍAS
-# ------------------------------------
+
+# Queries vacías
+
 def query_1(client): pass
 def query_2(client): pass
 def query_3(client): pass
-
-
-def query_13(client): pass
-def query_14(client): pass
