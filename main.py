@@ -22,20 +22,20 @@ def cassandra_menu():
     modelc.create_schema(session)
 
     cassandra_queries = {
-        1: modelc.query_1,
-        2: modelc.query_2,
-        3: modelc.query_3,
-        4: modelc.query_4,
-        5: modelc.query_5,
-        6: modelc.query_6,
-        7: modelc.query_7,
-        8: modelc.query_8, 
-        9: modelc.query_9,
-        10: modelc.query_10,
-        11: modelc.query_11, 
-        12: modelc.query_12,
-        13: modelc.query_13,
-        14: modelc.query_14,
+        1:  (modelc.query_1,  "Registrar una prescripción médica (historial de prescripciones)"),
+        2:  (modelc.query_2,  "Registrar un diagnóstico clínico (historial médico)"),
+        3:  (modelc.query_3,  "Registrar una donación de sangre"),
+        4:  (modelc.query_4,  "Registrar una vacunación aplicada a un paciente"),
+        5:  (modelc.query_5,  "Registrar una visita al hospital (visitantes/familiares)"),
+        6:  (modelc.query_6,  "Registrar una transacción económica del hospital"),
+        7:  (modelc.query_7,  "Registrar la ocupación de una sala quirúrgica o terapéutica"),
+        8:  (modelc.query_8,  "Consultar prescripciones de un paciente o por rango de fechas"),
+        9:  (modelc.query_9,  "Consultar historial médico de un paciente o conjunto de pacientes"),
+        10: (modelc.query_10, "Consultar donaciones de un donador o por rango de fechas"),
+        11: (modelc.query_11, "Consultar vacunas aplicadas a un paciente o por tipo/rango de fechas"),
+        12: (modelc.query_12, "Consultar visitas hacia un paciente o por rango de fechas"),
+        13: (modelc.query_13, "Consultar transacciones de una cuenta específica"),
+        14: (modelc.query_14, "Consultar ocupación de una sala o historial en rango de fechas"),
     }
 
     while True:
@@ -177,18 +177,18 @@ def mongo_menu():
     db = client.Hospital
 
     mongo_queries = {
-        2: modelm.query_1,
-        3: modelm.query_2,
-        4: modelm.query_3,
-        5: modelm.query_4,
-        6: modelm.query_5,
-        7: modelm.query_6,
-        8: modelm.query_7,
-        9: modelm.query_8,
-        10: modelm.query_9,
-        11: modelm.query_10,
-        12: modelm.query_11,
-        13: modelm.query_12,
+        1:  (modelm.query_1,  "Registrar un nuevo paciente"),
+        2:  (modelm.query_2,  "Registrar un nuevo doctor/empleado"),
+        3:  (modelm.query_3,  "Registrar un medicamento en el inventario"),
+        4:  (modelm.query_4,  "Registrar una especialidad médica del hospital"),
+        5:  (modelm.query_5,  "Registrar un servicio del hospital"),
+        6:  (modelm.query_6,  "Obtener el total de pacientes registrados"),
+        7:  (modelm.query_7,  "Buscar un paciente por un parámetro específico"),
+        8:  (modelm.query_8,  "Obtener la cantidad total de doctores/empleados"),
+        9:  (modelm.query_9,  "Buscar un doctor por un parámetro específico"),
+        10: (modelm.query_10, "Buscar un medicamento en específico por un parámetro"),
+        11: (modelm.query_11, "Listar todas las especialidades del hospital"),
+        12: (modelm.query_12, "Listar todos los servicios/tratamientos ofrecidos"),
     }
 
     while True:
