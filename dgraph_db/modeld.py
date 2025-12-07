@@ -46,7 +46,7 @@ def set_schema(client):
         cantidad: int .
         frecuencia: int .
 
-        GENERA: uid @reverse .
+        GENERA: [uid] @reverse .
         SOLICITA: [uid] @reverse .
         RECIBE: [uid] @reverse .
         ATIENDE: [uid] @reverse .
@@ -258,6 +258,44 @@ def query_5(client, id_doctor):
     
     finally:
         txn.discard()
+
+# Query 6: Doctors Most Occupied
+def query_6(client): 
+    query = """
+    {
+        doctors(func: type(Doctor)) {
+            uid
+            id_doctor
+            nombre
+            especialidad
+            demanda: count(ATIENDE)
+        }
+    }
+    """
+    # Execute the query
+    txn = client.txn(read_only=True)
+    
+    try:
+        res = txn.query(query)                              # Query
+        data = json.loads(res.json.decode('utf-8'))         # Response
+    finally:
+        txn.discard() 
+
+    # Get all rooms
+    doctors = data.get("doctors", [])
+    # Order rooms
+    doctors = sorted(doctors, key=lambda x: x.get("demanda", 0), reverse=True)
+
+    print()
+    print('=' * 40)
+    print()
+    for doctor in doctors:
+        print(f"Nombre: {doctor.get('nombre')}")
+        print(f"Especialidad: {doctor.get('especialidad')}")
+        print(f"Demanda: {doctor.get('demanda')}")
+        print()
+    print('=' * 40)
+    print()
 
 # Query 7: Hospital Rooms Most Occupied
 def query_7(client): 
@@ -472,7 +510,85 @@ def query_11(client, id_servicio, name):
     finally:
         txn.discard()
 
+# Query 12: Show all visits for a patient, as well as the reason
+def query_12(client, id_paciente, motivo=None): 
+    query = """
+    query getVisitas($id_paciente: string, $motivo: string) {
+    paciente(func: eq(id_paciente, $id_paciente)) {
+        uid
+        id_paciente
+        nombre
+        visitas: ~RECIBEN {
+        id_visita
+        fecha
+        motivo
+        }
 
+        visitas_filtradas(func: eq(motivo, $motivo)) {
+        id_visita
+        fecha
+        motivo
+        }
+    }
+    }
+    """
+
+    # Define variables for query substitution
+    variables = {"$id_paciente": id_paciente}
+    if motivo:
+        variables['$motivo'] = motivo
+    else:
+        variables['$motivo'] = ""
+
+    # Execute the query
+    txn = client.txn(read_only=True)
+    try:
+        # Query the database
+        res = txn.query(query, variables=variables)
+
+        # Store the response
+        data = json.loads(res.json.decode('utf-8'))
+
+        # Check if patient exists
+        if 'paciente' in data and len(data['paciente']) > 0:
+            paciente = data['paciente'][0]
+            print()
+            print('=' * 40)
+            print()
+
+            # Print Patient Data
+            print(f"\nInformación del Paciente\n")
+            for field in ['id_paciente', 'nombre']:
+                check_before_print(paciente, field)
+
+            # Print All Visits (if no reason is provided)
+            if not motivo: 
+                print(f'\nVisitas Recibidas:\n')
+                visitas = paciente.get('visitas', [])
+                if visitas:
+                    for visita in visitas:
+                        for field in ['id_visita', 'fecha', 'motivo']:
+                            check_before_print(visita, field, indent_level=1)
+                else:
+                    print('No se encontraron visitas recibidas.')
+            
+            # Print Visits filtered by reason
+            elif motivo:
+                print('\nVisitas Filtradas por Motivo')
+                visitas_filtradas = paciente.get('visitas_filtradas', [])
+                if visitas_filtradas:
+                    for visita in visitas_filtradas:
+                        for field in ['id_visita', 'fecha', 'motivo']:
+                            check_before_print(visita, field, indent_level=1)
+                else:
+                    print(f"No se encontraron visitas con el motivo '{motivo}'.")
+            print()
+            print("=" * 40)
+        else: 
+            print(f"No se encontraron visitas para el paciente con ID '{id_paciente}'.")
+
+    finally:
+        txn.discard()
 
 # ------------------------------------
 #   CHECK AND PRINT
@@ -491,9 +607,7 @@ def check_before_print(data, field_name, indent_level=0):
 def query_1(client): pass
 def query_2(client): pass
 def query_3(client): pass
-def query_6(client): pass
 
 
-def query_12(client): pass
 def query_13(client): pass
 def query_14(client): pass

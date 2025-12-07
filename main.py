@@ -230,7 +230,29 @@ def dgraph_menu():
                     servicio_id = int_attr_dict['serv_ids'][num_attr-1]
                     servicio_name = int_attr_dict['serv_names'][num_attr-1]
 
-                    
+                # Query 12
+                if choice == 12:
+                    visit_motives = [
+                        "Visita familiar",
+                        "Entrega documentos",
+                        "Saludo",
+                        "Visita médica",
+                        "Entrega comida"
+                    ]
+
+                    id_paciente = input('Ingrese el ID del paciente: ')
+                    # Visit motives
+                    print("\nMotivos de Visita disponibles:")
+                    for idx, motive in enumerate(visit_motives, 1):
+                        print(f"{idx}. {motive}")
+                    # User input for motive
+                    filtro = input('Seleccione el motivo de la visita (o presione Enter si no desea filtrar): ')
+                    if not filtro:
+                        motivo = ''
+                    else:
+                        motivo = visit_motives[int(filtro) - 1] if filtro.isdigit() and 1 <= int(filtro) <= len(visit_motives) else None
+                    # Query
+                    func(client, id_paciente, motivo)
 
         elif choice == 15:
             client_stub.close()
