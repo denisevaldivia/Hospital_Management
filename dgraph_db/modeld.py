@@ -125,7 +125,7 @@ def set_schema(client):
     print("[DGRAPH] Schema configurado correctamente")
 
 # Query 4: Show the relationship between a patient and their doctors
-def query_4(client, id_paciente): 
+def query_1(client, id_paciente): 
     query = """
     query getDoctors($id_paciente: int) {
         patient(func: eq(id_paciente, $id_paciente)) @filter(has(nombre)) {
@@ -192,7 +192,7 @@ def query_4(client, id_paciente):
         txn.discard()
 
 # Query 5: Show all rooms a doctor has booked
-def query_5(client, id_doctor):
+def query_2(client, id_doctor):
     query = """
     query getRooms($id_doctor: int) {
         doctor(func: eq(id_doctor, $id_doctor)) {
@@ -260,7 +260,7 @@ def query_5(client, id_doctor):
         txn.discard()
 
 # Query 6: Doctors Most Occupied
-def query_6(client): 
+def query_3(client): 
     query = """
     {
         doctors(func: type(Doctor)) {
@@ -298,7 +298,7 @@ def query_6(client):
     print()
 
 # Query 7: Hospital Rooms Most Occupied
-def query_7(client): 
+def query_4(client): 
     query = """
     {
         salas(func: type(Sala)) {
@@ -331,7 +331,7 @@ def query_7(client):
     print()
 
 # Query 8: Show services sorted by patient demand
-def query_8(client): 
+def query_5(client): 
     query = """
     {
         servicios(func: type(Servicio)) {
@@ -362,7 +362,7 @@ def query_8(client):
     print()
 
 # Query 9: Show number of patients a doctor has
-def query_9(client, id_doctor):
+def query_6(client, id_doctor):
     query = """
     query countPatients($id_doctor: int) {
         doctor(func: eq(id_doctor, $id_doctor)) {
@@ -405,7 +405,7 @@ def query_9(client, id_doctor):
         txn.discard()
 
 # Query 10: Number of prescriptions doctors have given by diagnosis
-def query_10(client, diagnosis): 
+def query_7(client, diagnosis): 
     query = """
     query countPrescriptions($diagnosis: string) {
         recetas(func: eq(diagnostico, $diagnosis)) {
@@ -462,7 +462,7 @@ def query_10(client, diagnosis):
         txn.discard()
 
 # Query 11: Transactions by service + total amount
-def query_11(client, id_servicio, name): 
+def query_8(client, id_servicio, name): 
     query = """
     query servicioQuery($id_servicio: int) {
 
@@ -520,7 +520,7 @@ def query_11(client, id_servicio, name):
         txn.discard()
 
 # Query 12: Show all visits for a patient (no filtering by motivo)
-def query_12(client, id_paciente, motivo):
+def query_9(client, id_paciente, motivo):
     # If no reason was specified
     if not motivo:
         query = """
@@ -611,7 +611,7 @@ def query_12(client, id_paciente, motivo):
         txn.discard()
 
 # Query 13: Diagnosis of Patients above 50 y/o
-def query_13(client):
+def query_10(client):
     query = """
     {
       pacientes_mayores(func: gt(edad, 50)) {
@@ -650,7 +650,7 @@ def query_13(client):
         txn.discard()
 
 # Query 14: Top 3 doctors filtered by experience years
-def query_14(client):
+def query_11(client):
     query = """
     {
       top_doctores(func: type(Doctor), orderdesc: anios_experiencia, first: 3) {
@@ -692,10 +692,3 @@ def check_before_print(data, field_name, indent_level=0):
     if value:
         indent = '    ' * indent_level             # Indentation
         print(f"{indent}{field_name.replace('_', ' ').capitalize()}: {value}")
-
-
-# Queries vacías
-
-def query_1(client): pass
-def query_2(client): pass
-def query_3(client): pass

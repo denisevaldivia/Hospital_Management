@@ -147,29 +147,26 @@ def dgraph_menu():
     modeld.set_schema(client)
 
     dgraph_queries = {
-        1: (modeld.query_1, 'Registrar a un nuevo doctor'),
-        2: (modeld.query_2, 'Registrar a un nuevo paciente'),
-        3: (modeld.query_3, 'Registrar a una visita'),
-        4: (modeld.query_4, 'Mostrar los doctores que atienden a un paciente'),
-        5: (modeld.query_5, 'Mostrar las salas que ha agendado un doctor'), 
-        6: (modeld.query_6, 'Mostrar los doctores con mayor demanda'),
-        7: (modeld.query_7, 'Mostrar las salas de hospital con mayor demanda'),
-        8: (modeld.query_8, 'Mostrar los servicios con mayor demanda'),
-        9: (modeld.query_9, 'Consultar cuántos pacientes atiende un doctor'),
-        10: (modeld.query_10, 'Consultar el total de recetas que han emitido los doctores según un diagnóstico'),
-        11: (modeld.query_11, 'Consultar la ganancia total de cada servicio'),
-        12: (modeld.query_12, 'Consultar las visitas de un paciente (y filtrar según el motivo)'),
-        13: (modeld.query_13, 'Consultar los diagnósticos que reciben pacientes mayores a 50 años'),
-        14: (modeld.query_14, 'Consultar los 3 doctores con mayor experiencia registrados en el hospital'),
+        1: (modeld.query_1, 'Mostrar los doctores que atienden a un paciente'),
+        2: (modeld.query_2, 'Mostrar las salas que ha agendado un doctor'),
+        3: (modeld.query_3, 'Mostrar los doctores con mayor demanda'),
+        4: (modeld.query_4, 'Mostrar las salas de hospital con mayor demanda'),
+        5: (modeld.query_5, 'Mostrar los servicios con mayor demanda'), 
+        6: (modeld.query_6, 'Consultar cuántos pacientes atiende un doctor'),
+        7: (modeld.query_7, 'Consultar el total de recetas que han emitido los doctores según un diagnóstico'),
+        8: (modeld.query_8, 'Consultar la ganancia total de cada servicio'),
+        9: (modeld.query_9, 'Consultar las visitas de un paciente (y filtrar según el motivo)'),
+        10: (modeld.query_10, 'Consultar los diagnósticos que reciben pacientes mayores a 50 años'),
+        11: (modeld.query_11, 'Consultar los 3 doctores con mayor experiencia registrados en el hospital'),
     }
 
     while True:
         print("\n--- DGRAPH MENU ---")
         print("0. Populate data")
-        for i in range(1, 15):
+        for i in range(1, 12):
             _, desc = dgraph_queries[i]
             print(f"{i}. {desc}")
-        print("15. Regresar al menú principal")
+        print("12. Regresar al menú principal")
 
         choice = int(input("Selecciona una opción: "))
         # Populate DB
@@ -177,27 +174,27 @@ def dgraph_menu():
             populated2.populate_data(client)
 
         # Queries
-        elif 1 <= choice <= 14:
+        elif 1 <= choice <= 11:
             func, _ = dgraph_queries.get(choice)
             if func:
-                if choice == 4:
+                if choice == 1:
                     id_paciente = input('Ingrese el ID del paciente: ')
                     func(client, id_paciente)
-                if choice == 5:
+                if choice == 2:
                     id_doctor = input('Ingrese el ID del doctor: ')
                     func(client, id_doctor)
+                if choice == 3:
+                    func(client)
+                if choice == 4:
+                    func(client)
+                if choice == 5:
+                    func(client)
                 if choice == 6:
-                    func(client)
-                if choice == 7:
-                    func(client)
-                if choice == 8:
-                    func(client)
-                if choice == 9:
                     id_doctor = input('Ingrese el ID del doctor: ')
                     func(client, id_doctor)
 
                 # Query 10
-                if choice == 10:
+                if choice == 7:
                     int_attr_dict = {
                         'numbers': [1,2,3,4,5,6],
                         'diagnosis': ['Gripe', 'Alergia', 'Fractura', 'Infección', 'Resfriado', 'Dengue']
@@ -214,7 +211,7 @@ def dgraph_menu():
                     func(client, diagnosis)
 
                 # Query 11
-                if choice == 11:
+                if choice == 8:
                     int_attr_dict = {
                         'serv_ids': [1,2,3,4,5,6,7],
                         'serv_names': ['Consulta General', 'Rayos X', 'Análisis de Sangre', 'Vacunación', 'Ultrasonido', 'Terapia Física', 'Tomografía']
@@ -233,7 +230,7 @@ def dgraph_menu():
                     func(client, str(servicio_id), servicio_name)
 
                 # Query 12
-                if choice == 12:
+                if choice == 9:
                     visit_motives = [
                         "Visita familiar",
                         "Entrega documentos",
@@ -254,13 +251,13 @@ def dgraph_menu():
                     # Query
                     func(client, id_paciente, motivo)
 
-                if choice == 13:
+                if choice == 10:
                     func(client)
                 
-                if choice == 14:
+                if choice == 11:
                     func(client)
 
-        elif choice == 15:
+        elif choice == 12:
             client_stub.close()
             break
         else:
