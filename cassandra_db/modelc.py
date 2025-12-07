@@ -126,12 +126,72 @@ def drop_schema(session):
 #   QUERIES VACÍAS
 # ------------------------------------
 
-def query_1(session): pass
-def query_2(session): pass
-def query_3(session): pass
-def query_4(session): pass
-def query_5(session): pass
-def query_7(session): pass
+def query_1(session, params):
+    query = """INSERT INTO prescriptions_by_patient 
+            (exp_paciente, fecha_creacion, doctor_responsable, medicamentos, observaciones) 
+            VALUES (?, ?, ?, ?, ?)"""
+
+    # Preparar y ejecutar
+    stmt = session.prepare(query)
+    rows = session.execute(stmt, params)
+
+    # Mostrar resultados
+    print(f"\n=== Se añadío la nueva prescripción con éxito ===")
+
+def query_2(session, params):
+    query = """INSERT INTO historial_by_patient 
+               (exp_paciente, fecha_diagnostico, descripcion, observaciones, doctor_responsable) 
+               VALUES (?, ?, ?, ?, ?)"""
+    
+    stmt = session.prepare(query)
+    session.execute(stmt, params)
+    print("\n=== Se añadió el nuevo diagnóstico/historial médico con éxito ===")
+
+def query_3(session, params):
+    query = """INSERT INTO blood_donation_by_patient 
+               (exp_donador, fecha_donacion, tipo_sangre, nombre, cantidad) 
+               VALUES (?, ?, ?, ?, ?)"""
+    
+    stmt = session.prepare(query)
+    session.execute(stmt, params)
+    print("\n=== Se añadió la nueva donación de sangre con éxito ===")
+
+def query_4(session, params):
+    query = """INSERT INTO vaccines_by_patient 
+               (exp_paciente, fecha_vacuna, tipo_vacuna, dosis, lote) 
+               VALUES (?, ?, ?, ?, ?)"""
+    
+    stmt = session.prepare(query)
+    session.execute(stmt, params)
+    print("\n=== Se añadió la nueva vacuna con éxito ===")
+
+def query_5(session, params):
+    query = """INSERT INTO logs_by_visit 
+               (exp_paciente, fecha_visita, nombre_visitante, motivo, duracion, relacion_paciente) 
+               VALUES (?, ?, ?, ?, ?, ?)"""
+    
+    stmt = session.prepare(query)
+    session.execute(stmt, params)
+    print("\n=== Se añadió la nueva visita con éxito ===")
+
+def query_6(session, params):
+    query = """INSERT INTO logs_by_transactions 
+               (cuenta, fecha_pago, tipo_transaccion, monto, metodo_pago, folio) 
+               VALUES (?, ?, ?, ?, ?, ?)"""
+    
+    stmt = session.prepare(query)
+    session.execute(stmt, params)
+    print("\n=== Se añadió la nueva transacción con éxito ===")
+
+def query_7(session, params):
+    query = """INSERT INTO logs_by_room 
+               (id_sala, fecha_evento, tipo_sala, estado, responsable, descripcion) 
+               VALUES (?, ?, ?, ?, ?, ?)"""
+    
+    stmt = session.prepare(query)
+    session.execute(stmt, params)
+    print("\n=== Se añadió el nuevo registro de sala con éxito ===")
+
 def query_8(session, exp_paciente, inicio=None, fin=None):
     # Base de la query
     query = """
@@ -162,15 +222,80 @@ def query_8(session, exp_paciente, inicio=None, fin=None):
         print(f"Rango: {inicio} → {fin}\n")
 
     for row in rows:
-        print(f"Paciente: {row.exp_paciente}")
+        print(f"\nPaciente: {row.exp_paciente}")
         print(f"  - Fecha: {row.order_date_readable}")
         print(f"  - Doctor Responsable: {row.doctor_responsable}")
         print(f"  - Medicamentos: {row.medicamentos}")
         print(f"  - Observaciones: {row.observaciones}")
         print()
 
-def query_9(session): pass
-def query_10(session): pass
+def query_9(session, exp_pacientes):
+    # Asegurarnos de que exp_pacientes sea lista
+    if isinstance(exp_pacientes, str):
+        exp_pacientes = [exp_pacientes]
+
+    # Construir placeholders para IN
+    placeholders = ", ".join(["?"] * len(exp_pacientes))
+
+    query = f"""
+        SELECT exp_paciente, toDate(fecha_diagnostico) AS fecha_readable,
+               descripcion, observaciones, doctor_responsable
+        FROM historial_by_patient
+        WHERE exp_paciente IN ({placeholders})
+    """
+
+    stmt = session.prepare(query)
+    rows = session.execute(stmt, tuple(exp_pacientes))
+
+    print(f"\n=== Historial médico de los pacientes: {exp_pacientes} ===")
+    for row in rows:
+        print(f"\nPaciente: {row.exp_paciente}")
+        print(f"  - Fecha diagnóstico: {row.fecha_readable}")
+        print(f"  - Descripción: {row.descripcion}")
+        print(f"  - Observaciones: {row.observaciones}")
+        print(f"  - Doctor responsable: {row.doctor_responsable}")
+
+def query_10(session, exp_donador, inicio=None, fin=None, tipo=None):
+    # Base de la query
+    query = """
+        SELECT exp_donador, toDate(fecha_donacion) AS order_date_readable,
+               tipo_sangre, nombre, cantidad
+        FROM blood_donation_by_patient
+        WHERE exp_donador = ?
+    """
+
+    params = [exp_donador]
+
+    # Agrega filtros opcionales
+    if inicio is not None:
+        query += " AND fecha_donacion >= minTimeuuid(?)"
+        params.append(inicio)
+
+    if fin is not None:
+        query += " AND fecha_donacion <= maxTimeuuid(?)"
+        params.append(fin)
+
+    # Preparar y ejecutar
+    stmt = session.prepare(query)
+    rows = session.execute(stmt, params)
+
+    # Mostrar resultados
+    print(f"\n=== Donaciones realizadas por: {exp_donador} ===")
+    if inicio or fin:
+        print(f"Rango: {inicio} → {fin}\n")
+    
+    for row in rows:
+        # Filtro por tipo manual
+        if tipo is not None and row.tipo_sangre != tipo:
+            continue
+
+        print(f"\nDonador: {row.exp_donador}")
+        print(f"  - Fecha: {row.order_date_readable}")
+        print(f"  - Tipo: {row.tipo_sangre}")
+        print(f"  - Nombre: {row.nombre}")
+        print(f"  - Cantidad: {row.cantidad}")
+        print()
+
 def query_11(session, exp_paciente, inicio=None, fin=None, tipo=None):
     # Base de la query
     query = """
@@ -205,7 +330,7 @@ def query_11(session, exp_paciente, inicio=None, fin=None, tipo=None):
         if tipo is not None and row.tipo_vacuna != tipo:
             continue
 
-        print(f"Paciente: {row.exp_paciente}")
+        print(f"\nPaciente: {row.exp_paciente}")
         print(f"  - Fecha: {row.order_date_readable}")
         print(f"  - Tipo: {row.tipo_vacuna}")
         print(f"  - Dosis: {row.dosis}")
@@ -242,7 +367,7 @@ def query_12(session, exp_paciente, inicio=None, fin=None):
         print(f"Rango: {inicio} → {fin}\n")
 
     for row in rows:
-        print(f"Paciente: {row.exp_paciente}")
+        print(f"\nPaciente: {row.exp_paciente}")
         print(f"  - Fecha: {row.order_date_readable}")
         print(f"  - Nombre del Visitante: {row.nombre_visitante}")
         print(f"  - Relación: {row.relacion_paciente}")
@@ -250,5 +375,60 @@ def query_12(session, exp_paciente, inicio=None, fin=None):
         print(f"  - Duracion: {row.duracion}")
         print()
 
-def query_13(session): pass
-def query_14(session): pass
+def query_13(session, cuenta):
+    query = f"""
+        SELECT cuenta, toDate(fecha_pago) AS fecha_readable,
+               tipo_transaccion, monto, metodo_pago, folio
+        FROM logs_by_transactions
+        WHERE cuenta = ?
+    """
+
+    stmt = session.prepare(query)
+    rows = session.execute(stmt, (cuenta,))
+
+    print(f"\n=== Transacciones de la cuenta: {cuenta} ===")
+    for row in rows:
+        print(f"\nCuenta: {row.cuenta}")
+        print(f"  - Fecha Pago: {row.fecha_readable}")
+        print(f"  - Tipo: {row.tipo_transaccion}")
+        print(f"  - Monto: {row.monto}")
+        print(f"  - Método de pago: {row.metodo_pago}")
+        print(f"  - Folio: {row.folio}")
+
+def query_14(session, id_sala, inicio=None, fin=None):
+        # Base de la query
+    query = """
+        SELECT id_sala, toDate(fecha_evento) AS order_date_readable,
+               tipo_sala, estado, responsable, descripcion
+        FROM logs_by_room
+        WHERE id_sala = ?
+    """
+
+    params = [id_sala]
+
+    # Agrega filtros opcionales
+    if inicio is not None:
+        query += " AND fecha_evento >= minTimeuuid(?)"
+        params.append(inicio)
+
+    if fin is not None:
+        query += " AND fecha_evento <= maxTimeuuid(?)"
+        params.append(fin)
+    
+    # Preparar y ejecutar
+    stmt = session.prepare(query)
+    rows = session.execute(stmt, params)
+
+    # Mostrar resultados
+    print(f"\n=== Logs de la Sala: {id_sala} ===")
+    if inicio or fin:
+        print(f"Rango: {inicio} → {fin}\n")
+
+    for row in rows:
+        print(f"\nSala: {row.id_sala}")
+        print(f"  - Fecha: {row.order_date_readable}")
+        print(f"  - Tipo Sala: {row.tipo_sala}")
+        print(f"  - Estado: {row.estado}")
+        print(f"  - Responsable: {row.responsable}")
+        print(f"  - Descripcion: {row.descripcion}")
+        print()
