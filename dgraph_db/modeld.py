@@ -676,7 +676,7 @@ def query_11(client):
             return
 
         for i, d in enumerate(doctores, 1):
-            print(f"{i}. Dr. {d.get('nombre')} — {d.get('especialidad')}")
+            print(f"{i}. {d.get('nombre')} — {d.get('especialidad')}")
             print(f"   Años de experiencia: {d.get('anios_experiencia')}\n")
 
     finally:

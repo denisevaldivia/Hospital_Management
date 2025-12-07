@@ -195,21 +195,21 @@ def mongo_menu():
     while True:
         print("\n--- MONGODB MENU ---")
         print("1. Populate data")
-        for i in range(2, 14):
+        for i in range(2, 12):
             _, desc = mongo_queries[i]
             print(f"{i}. {desc}")
-        print("14. Regresar al menú principal")
+        print("13. Regresar al menú principal")
 
         choice = int(input("Selecciona una opción: "))
         if choice == 1:
             populatem.populate_data(db)
-        elif 2 <= choice <= 13:
+        elif 2 <= choice <= 12:
             func, _ = mongo_queries.get(choice)
             if func:
                 func(db)
             else:
                 print("Query not implemented yet")
-        elif choice == 14:
+        elif choice == 13:
             client.close()
             break
         else:
